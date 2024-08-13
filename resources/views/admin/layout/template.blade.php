@@ -9,6 +9,11 @@
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap JS (optional, for dismissible alerts) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- VENDOR CSS -->
     <link rel="stylesheet" href="{{ url('assets/vendor/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/vendor/font-awesome/css/font-awesome.min.css') }}">
@@ -38,7 +43,7 @@
                 <div class="navbar-brand">
                     <button type="button" class="btn-toggle-offcanvas"><i class="fa fa-bars"></i></button>
                     <button type="button" class="btn-toggle-fullwidth"><i class="fa fa-bars"></i></button>
-                    <a href="{{ route('dashboard') }}">ICONIC</a>
+                    <a href="{{ route('dashboard') }}">Project & Task Management</a>
                 </div>
 
                 <div class="navbar-right">
@@ -130,7 +135,8 @@
             <button type="button" class="btn-toggle-offcanvas"><i class="fa fa-arrow-left"></i></button>
             <div class="sidebar-scroll">
                 <div class="user-account">
-                    <img src="assets/images/user.png" class="rounded-circle user-photo" alt="User Profile Picture">
+                    <img src="{{ url('assets/images/user.png') }}" class="rounded-circle user-photo"
+                        alt="User Profile Picture">
                     <div class="dropdown">
                         <span>Welcome,</span>
                         <a href="javascript:void(0);" class="dropdown-toggle user-name"

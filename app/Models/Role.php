@@ -14,4 +14,10 @@ class Role extends Model
     {
         return $this->hasMany(ProjectUser::class);
     }
+
+    // In the Role model (Role.php)
+    public function users()
+    {
+        return $this->belongsToMany(User::class);
+    }
 }

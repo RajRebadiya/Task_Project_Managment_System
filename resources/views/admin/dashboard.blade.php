@@ -32,7 +32,7 @@
                     <div class="card number-chart">
                         <div class="body">
                             <span class="text-uppercase">Total Project</span>
-                            <h4 class="mb-0 mt-2">10</h4>
+                            <h4 class="mb-0 mt-2">{{ $project }}</h4>
                             <small class="text-muted">Analytics for last week</small>
                         </div>
                         <div class="sparkline" data-type="line" data-spot-Radius="0" data-offset="90" data-width="100%"
@@ -44,7 +44,7 @@
                     <div class="card number-chart">
                         <div class="body">
                             <span class="text-uppercase">Total Membar</span>
-                            <h4 class="mb-0 mt-2">50</h4>
+                            <h4 class="mb-0 mt-2">{{ $user }}</h4>
                             <small class="text-muted">Analytics for last week</small>
                         </div>
                         <div class="sparkline" data-type="line" data-spot-Radius="0" data-offset="90" data-width="100%"

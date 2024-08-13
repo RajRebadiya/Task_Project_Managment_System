@@ -16,4 +16,9 @@ class Project extends Model
             ->withPivot('role_id')
             ->withTimestamps();
     }
+
+    public function getRoleNameById($roleId)
+    {
+        return Role::where('id', $roleId)->pluck('role_name')->first();
+    }
 }

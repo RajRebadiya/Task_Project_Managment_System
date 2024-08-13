@@ -44,4 +44,8 @@ Route::controller(AdminController::class)->group(function () {
     Route::post('add-project', 'add_project')->name('add_project')->middleware('admin');
 
     Route::get('/users', 'users')->name('users')->middleware('admin');
+    Route::get('/project-detail/{id}', 'project_detail')->name('project_detail')->middleware('admin');
+    Route::get('/project-edit/{id}', 'project_edit')->name('project_edit')->middleware('admin');
+    Route::post('/edit-project', 'edit_project')->name('edit_project')->middleware('admin');
+    Route::get('/delete-project/{id}', 'delete_project')->name('delete_project')->middleware('admin');
 });

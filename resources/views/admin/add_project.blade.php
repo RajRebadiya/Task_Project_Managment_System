@@ -37,8 +37,8 @@
 
                                 <div class="form-group">
                                     <label for="description">Project Description</label>
-                                    <textarea class="form-control" id="description" value='{{ old('description') }}' name="description" rows="4"
-                                        placeholder="Enter project description"></textarea>
+                                    <textarea class="form-control" id="description" name="description" rows="4"
+                                        placeholder="Enter project description">{{ old('description') }}</textarea>
                                     @error('description')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
@@ -49,7 +49,6 @@
                                         <label for="start_date">Start Date</label>
                                         <input type="date" class="form-control" value="{{ old('start_date') }}"
                                             id="start_date" name="start_date">
-
                                         @error('start_date')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
@@ -59,22 +58,25 @@
                                         <label for="due_date">Due Date</label>
                                         <input type="date" class="form-control" value="{{ old('due_date') }}"
                                             id="due_date" name="due_date">
-
                                         @error('due_date')
                                             <span class="text-danger">{{ $message }}</span>
                                         @enderror
                                     </div>
                                 </div>
 
-
                                 <div class="form-group">
                                     <label for="priority">Priority</label>
-                                    <select class="form-control" id="priority" value='{{ old('priority') }}'
-                                        name="priority">
-                                        <option value="">Select priority</option>
-                                        @foreach ($priorities as $priority)
-                                            <option value="{{ $priority }}">{{ $priority }}</option>
-                                        @endforeach
+                                    <select class="form-control" id="priority" name="priority">
+                                        <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Low</option>
+                                        <option value="medium" {{ old('priority') == 'medium' ? 'selected' : '' }}>Medium
+                                        </option>
+                                        <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>High
+                                        </option>
+                                        <option value="urgent" {{ old('priority') == 'urgent' ? 'selected' : '' }}>
+                                            Urgent</option>
+                                        <option value="critical" {{ old('priority') == 'critical' ? 'selected' : '' }}>
+                                            Critical</option>
+
                                     </select>
                                     @error('priority')
                                         <span class="text-danger">{{ $message }}</span>
@@ -83,12 +85,20 @@
 
                                 <div class="form-group">
                                     <label for="project_category">Project Category</label>
-                                    <select class="form-control" value='{{ old('project_category') }}'
-                                        id="project_category" name="project_category">
-                                        <option value="">Select category</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category }}">{{ $category }}</option>
-                                        @endforeach
+                                    <select class="form-control" id="project_category" name="project_category">
+                                        <option value="laravel"
+                                            {{ old('project_category') == 'laravel' ? 'selected' : '' }}>Laravel
+                                        </option>
+                                        <option value="flutter"
+                                            {{ old('project_category') == 'flutter' ? 'selected' : '' }}>
+                                            Flutter</option>
+                                        <option value="react" {{ old('project_category') == 'react' ? 'selected' : '' }}>
+                                            React
+                                        </option>
+                                        <option value='nodejs' {{ old('project_category') == 'nodejs' ? 'selected' : '' }}>
+                                            Node JS</option>
+                                        <option value='ui/ux' {{ old('project_category') == 'ui/ux' ? 'selected' : '' }}>
+                                            UI/UX</option>
                                     </select>
                                     @error('project_category')
                                         <span class="text-danger">{{ $message }}</span>
@@ -106,11 +116,13 @@
 
                                 <div class="form-group">
                                     <label for="status">Status</label>
-                                    <select class="form-control" value='{{ old('status') }}' id="status" name="status">
-                                        <option value="">Select status</option>
-                                        @foreach ($status_data as $status)
-                                            <option value="{{ $status }}">{{ $status }}</option>
-                                        @endforeach
+                                    <select class="form-control" id="status" name="status">
+                                        <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>
+                                            Active</option>
+                                        <option value="in_progress" {{ old('status') == 'in_progress' ? 'selected' : '' }}>
+                                            In Progress</option>
+                                        <option value="completed" {{ old('status') == 'completed' ? 'selected' : '' }}>
+                                            Completed</option>
                                     </select>
                                     @error('status')
                                         <span class="text-danger">{{ $message }}</span>
@@ -124,8 +136,7 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="user-select">Select User</label>
-                                                    <select class="form-control user-select" value='{{ old('user_id') }}'
-                                                        name="user_roles[0][user_id]">
+                                                    <select class="form-control user-select" name="user_roles[0][user_id]">
                                                         <option value="">Select User</option>
                                                         @foreach ($users as $user)
                                                             <option value="{{ $user->id }}">{{ $user->name }}
@@ -140,8 +151,8 @@
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label for="role-select">Assign Role</label>
-                                                    <select class="form-control role-select" name="user_roles[0][role_id]"
-                                                        value='{{ old('role_id') }}'>
+                                                    <select class="form-control role-select"
+                                                        name="user_roles[0][role_id]">
                                                         <option value="">Select Role</option>
                                                         @foreach ($roles as $role)
                                                             <option value="{{ $role->id }}">{{ $role->role_name }}
@@ -168,6 +179,7 @@
             </div>
         </div>
     </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

@@ -1,7 +1,42 @@
 @extends('admin.layout.template')
 
 @section('title', 'Project')
+<link rel="stylesheet" href="assets/vendor/sweetalert/sweetalert.css" />
+<style>
+    /* Define the styles for each priority level */
+    .priority-level {
+        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 4px;
+        color: #fff;
+        font-weight: bold;
+    }
 
+    .priority-low {
+        background-color: #4CAF50;
+        /* Blue */
+    }
+
+    .priority-medium {
+        background-color: #FFC107;
+        /* Orange */
+    }
+
+    .priority-high {
+        background-color: #FF9800;
+        /* Red */
+    }
+
+    .priority-urgent {
+        background-color: #F44336;
+        /* Light Red */
+    }
+
+    .priority-critical {
+        background-color: #D32F2F;
+        /* Dark Red */
+    }
+</style>
 @section('content')
     <!-- mani page content body part -->
     <div id="main-content" style='width: calc(100% - 279px);'>
@@ -30,6 +65,19 @@
                     </div>
                 </div>
             </div>
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
             <div class="row clearfix">
                 <div class="col-lg-12 col-md-12">
@@ -41,44 +89,120 @@
                                         <tr>
                                             <th>Status</th>
                                             <th>Project</th>
-                                            <th>Prograss</th>
+                                            <th>Due Date</th>
+                                            <th>Budget</th>
+                                            <th>Priority</th>
                                             <th>Team</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <span class="badge badge-success">Active</span>
-                                            </td>
-                                            <td class="project-title">
-                                                <h6><a href="javascript:void(0);">InfiniO 4.1</a></h6>
-                                                <small>Created 14.Mar.2018</small>
-                                            </td>
-                                            <td>
-                                                <div class="progress progress-xs">
-                                                    <div class="progress-bar" role="progressbar" aria-valuenow="48"
-                                                        aria-valuemin="0" aria-valuemax="100" style="width: 48%;"></div>
-                                                </div>
-                                                <small>Completion with: 48%</small>
-                                            </td>
-                                            <td>
-                                                <ul class="list-unstyled team-info">
-                                                    <li><img src="{{ url('assets/images/xs/avatar1.jpg') }}" alt="Avatar">
-                                                    </li>
-                                                    <li><img src="{{ url('assets/images/xs/avatar2.jpg') }}" alt="Avatar">
-                                                    </li>
-                                                    <li><img src="{{ url('assets/images/xs/avatar3.jpg') }}" alt="Avatar">
-                                                    </li>
-                                                </ul>
-                                            </td>
-                                            <td class="project-actions">
-                                                <a href="javascript:void(0);" class="btn btn-outline-danger"><i
-                                                        class="fa fa-eye"></i></a>
-                                                <a href="javascript:void(0);" class="btn btn-outline-warning"><i
-                                                        class="fa fa-pencil"></i></a>
-                                            </td>
-                                        </tr>
+                                        @foreach ($projects as $item)
+                                            <tr>
+                                                <td>
+                                                    @php
+                                                        $status = $item->status;
+                                                    @endphp
+
+                                                    <span
+                                                        class="badge 
+                                                        @if ($status == 'active') badge-primary
+                                                        @elseif($status == 'completed')
+                                                            badge-success
+                                                        @elseif($status == 'in_progress')
+                                                            badge-warning
+                                                        @else
+                                                            badge-secondary @endif
+                                                    ">
+                                                        {{ $status }}
+                                                    </span>
+                                                </td>
+                                                <td class="project-title">
+                                                    <h6><a href="javascript:void(0);">{{ $item->title }}</a></h6>
+                                                    <small>{{ $item->start_date }}</small>
+                                                </td>
+                                                <td>
+                                                    {{ $item->due_date }}
+                                                </td>
+                                                <td>
+                                                    {{ $item->budget }}
+                                                </td>
+                                                <td>
+                                                    @php
+                                                        $priority = $item->priority;
+                                                    @endphp
+
+                                                    <!-- Define the color codes or labels for each priority level -->
+                                                    <span class="priority-level priority-{{ $priority }}">
+                                                        @switch($priority)
+                                                            @case('low')
+                                                                Low
+                                                            @break
+
+                                                            @case('medium')
+                                                                Medium
+                                                            @break
+
+                                                            @case('high')
+                                                                High
+                                                            @break
+
+                                                            @case('urgent')
+                                                                Urgent
+                                                            @break
+
+                                                            @case('critical')
+                                                                Critical
+                                                            @break
+
+                                                            @default
+                                                                Unknown
+                                                        @endswitch
+                                                    </span>
+                                                </td>
+
+                                                <td>
+                                                    <ul class="list-unstyled team-info">
+                                                        <li><img src="{{ url('assets/images/xs/avatar1.jpg') }}"
+                                                                alt="Avatar">
+                                                        </li>
+                                                        <li><img src="{{ url('assets/images/xs/avatar2.jpg') }}"
+                                                                alt="Avatar">
+                                                        </li>
+                                                        <li><img src="{{ url('assets/images/xs/avatar3.jpg') }}"
+                                                                alt="Avatar">
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td class="project-actions">
+                                                    <a href="{{ route('project_detail', ['id' => $item->id]) }}"
+                                                        class="btn btn-outline-info">
+                                                        <i class="fa fa-eye"></i>
+                                                    </a>
+
+                                                    <a href="{{ route('project_edit', ['id' => $item->id]) }}"
+                                                        class="btn btn-outline-warning"><i class="fa fa-pencil"></i></a>
+                                                    <a href="javascript:void(0);"
+                                                        class="btn btn-outline-danger js-sweetalert" data-type="confirm"
+                                                        data-url="{{ route('delete_project', ['id' => $item->id]) }}">
+                                                        <i class="fa fa-trash"></i>
+                                                    </a>
+
+                                                    <!-- Hidden form for deletion -->
+                                                    <form id="delete-form-{{ $item->id }}"
+                                                        action="{{ route('delete_project', ['id' => $item->id]) }}"
+                                                        method="POST" style="display: none;">
+                                                        @csrf
+                                                        @method('GET')
+                                                    </form>
+
+
+
+
+                                                </td>
+                                            </tr>
+                                        @endforeach
+
                                     </tbody>
                                 </table>
                             </div>
@@ -89,4 +213,34 @@
 
         </div>
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.js-sweetalert').forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent the default action
+                    const url = this.getAttribute('data-url'); // Get the URL from data attribute
+                    const formId = 'delete-form-' + url.split('/')
+                        .pop(); // Generate form ID based on URL
+
+                    Swal.fire({
+                        title: 'Are you sure?',
+                        text: "You won't be able to revert this!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, delete it!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById(formId)
+                                .submit(); // Submit the form if confirmed
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+
 @endsection

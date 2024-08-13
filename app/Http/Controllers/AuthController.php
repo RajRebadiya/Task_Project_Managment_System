@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-use App\Models\Admin;
+use App\Models\Project;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
@@ -85,20 +85,15 @@ class AuthController extends Controller
         } else {
             return redirect('/admin')->with('error', 'Wrong credentials');
         }
-
-        // $admin = Admin::where('email', $request->email)->first();
-        // if (!$admin || !Hash::check($request->password, $admin->password)) {
-        //     return redirect('/admin')->with('error', 'Invalid credentials');
-        // } else {
-        //     return redirect('/dashboard')->with('success', 'Logged in successfully');
-        // }
     }
 
     public function dashboard()
     {
         // Check if the authenticated user is an admin
         if (Auth::guard('admin')->check()) {
-            return view('admin.dashboard'); // Return the admin dashboard view
+            $project = Project::all()->count();
+            $user = User::all()->count();
+            return view('admin.dashboard', compact('project', 'user')); // Return the admin dashboard view
         }
 
         // Check if the authenticated user is a regular user
