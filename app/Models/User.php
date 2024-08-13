@@ -44,12 +44,14 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function role()
+    public function roles()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->belongsToMany(Role::class, 'project_user')
+            ->withPivot('project_id')
+            ->withTimestamps();
     }
 
-    public function projects(): BelongsToMany
+    public function project(): BelongsToMany
     {
         return $this->belongsToMany(Project::class)
             ->withPivot('role_id')

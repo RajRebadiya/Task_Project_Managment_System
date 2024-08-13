@@ -9,4 +9,5 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class ProjectUser extends Pivot
 {
     use HasFactory;
+    public $table = 'project_users';
 }
