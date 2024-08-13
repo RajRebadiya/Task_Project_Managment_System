@@ -40,4 +40,5 @@ Route::controller(AuthController::class)->group(function () {
 
 Route::controller(AdminController::class)->group(function () {
     Route::get('/projects', 'projects')->name('projects')->middleware('admin');
+    Route::get('add-project', 'add_project_show')->name('add_project_show')->middleware('admin');
 });

@@ -20,8 +20,8 @@
                         <div class="d-flex flex-row-reverse">
                             <div class="page_action">
 
-                                <button type="button" class="btn btn-secondary"><i class="fa fa-plus"></i>Add
-                                    Project</button>
+                                <button type="button" class="btn btn-secondary"><i class="fa fa-plus"></i><a
+                                        href="{{ route('add_project_show') }}" class='text-white'>Add Project</a></button>
                             </div>
                             <div class="p-2 d-flex">
 
