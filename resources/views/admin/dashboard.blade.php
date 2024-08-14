@@ -83,7 +83,7 @@
                 <div class="col-lg-8 col-md-12 col-sm-12">
                     <div class="card">
                         <div class="header">
-                            <h2>Timeline</h2>
+                            <h2>Timeline </h2>
                         </div>
                         <div class="body" style="position: relative;">
                             <div id="apex-timeline" style="min-height: 365px;">
