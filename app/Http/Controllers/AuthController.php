@@ -98,7 +98,13 @@ class AuthController extends Controller
 
         // Check if the authenticated user is a regular user
         if (Auth::guard('web')->check()) {
-            return view('users.dashboard'); // Return the user dashboard view
+            // Retrieve the currently authenticated user
+            $user = Auth::guard('web')->user();
+
+            // Get the count of projects assigned to this user
+            $projectCount = $user->project->count();
+
+            return view('users.dashboard', compact('projectCount')); // Return the user dashboard view
         }
 
         // If not authenticated, redirect to the login page

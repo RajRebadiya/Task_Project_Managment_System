@@ -158,7 +158,7 @@
                                             class="fa fa-dashboard"></i><span>Dashboard</span></a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('dashboard') }}"><i
+                                    <a href="{{ route('projects') }}"><i
                                             class="fa fa-briefcase"></i><span>Projects</span></a>
                                 </li>
 

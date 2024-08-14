@@ -3,40 +3,56 @@
 @section('title', 'Project')
 <link rel="stylesheet" href="assets/vendor/sweetalert/sweetalert.css" />
 <style>
-    /* Define the styles for each priority level */
-    .priority-level {
-        display: inline-block;
-        padding: 5px 10px;
-        border-radius: 4px;
-        color: #fff;
+    .dropdown-toggle::after {
+        display: none;
+        /* Hide the default dropdown arrow */
+    }
+
+    .dropdown-menu {
+        min-width: 160px;
+        /* Set minimum width for the dropdown menu */
+    }
+
+    .dropdown-item {
+        cursor: pointer;
+    }
+
+    .dropdown-item.active {
         font-weight: bold;
+        color: #fff;
     }
 
-    .priority-low {
-        background-color: #4CAF50;
-        /* Blue */
+    .bg-success {
+        background-color: #28a745 !important;
+        /* Green */
     }
 
-    .priority-medium {
-        background-color: #FFC107;
-        /* Orange */
+    .bg-warning {
+        background-color: #ffc107 !important;
+        /* Yellow */
     }
 
-    .priority-high {
-        background-color: #FF9800;
+    .bg-danger {
+        background-color: #dc3545 !important;
         /* Red */
     }
 
-    .priority-urgent {
-        background-color: #F44336;
-        /* Light Red */
+    .bg-secondary {
+        background-color: #6c757d !important;
+        /* Gray */
     }
 
-    .priority-critical {
-        background-color: #D32F2F;
-        /* Dark Red */
+    .text-white {
+        color: #fff !important;
+    }
+
+    .text-dark {
+        color: #343a40 !important;
     }
 </style>
+
+
+
 @section('content')
     <!-- mani page content body part -->
     <div id="main-content" style='width: calc(100% - 279px);'>
@@ -91,7 +107,7 @@
                                             <th>Project</th>
                                             <th>Due Date</th>
                                             <th>Budget</th>
-                                            <th>Priority</th>
+                                            <th>Client</th>
                                             <th>Team</th>
                                             <th>Action</th>
                                         </tr>
@@ -102,65 +118,74 @@
                                                 <td>
                                                     @php
                                                         $status = $item->status;
+                                                        // Define the status colors
+                                                        $statusColors = [
+                                                            'active' => 'bg-success text-white',
+                                                            'completed' => 'bg-dark text-white',
+                                                            'on_hold' => 'bg-warning text-dark',
+                                                            'pending' => 'bg-danger text-white',
+                                                            'active' => 'bg-success text-white',
+                                                        ];
+                                                        $statusClass =
+                                                            $statusColors[$status] ?? 'bg-secondary text-white';
                                                     @endphp
 
-                                                    <span
-                                                        class="badge 
-                                                        @if ($status == 'active') badge-primary
-                                                        @elseif($status == 'completed')
-                                                            badge-success
-                                                        @elseif($status == 'in_progress')
-                                                            badge-warning
-                                                        @else
-                                                            badge-secondary @endif
-                                                    ">
-                                                        {{ $status }}
-                                                    </span>
+                                                    <!-- Form to update the status -->
+                                                    <form action="{{ route('update-status') }}" method="POST"
+                                                        class="d-inline">
+                                                        @csrf
+
+                                                        <!-- Dropdown for selecting status -->
+                                                        <div class="dropdown">
+                                                            <button
+                                                                class="btn {{ $statusClass }} form-control form-control-sm dropdown-toggle"
+                                                                type="button" id="dropdownMenuButton"
+                                                                data-bs-toggle="dropdown" aria-expanded="false">
+                                                                {{ ucfirst($status) }}
+                                                            </button>
+                                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                                                @foreach (['active', 'completed', 'on_hold', 'pending'] as $statusOption)
+                                                                    @php
+                                                                        $statusOptionClass =
+                                                                            $statusColors[$statusOption];
+                                                                    @endphp
+                                                                    <li>
+                                                                        <a class="dropdown-item {{ $status == $statusOption ? 'active ' . $statusOptionClass : $statusOptionClass }}"
+                                                                            href="javascript:void(0);"
+                                                                            onclick="event.preventDefault(); document.getElementById('status-form-{{ $item->id }}-{{ $statusOption }}').submit();">
+                                                                            {{ ucfirst($statusOption) }}
+                                                                        </a>
+                                                                        <form
+                                                                            id="status-form-{{ $item->id }}-{{ $statusOption }}"
+                                                                            action="{{ route('update-status') }}"
+                                                                            method="POST" style="display: none;">
+                                                                            @csrf
+                                                                            <input type="hidden" name="status"
+                                                                                value="{{ $statusOption }}">
+                                                                            <input type="hidden" name="id"
+                                                                                value="{{ $item->id }}">
+                                                                        </form>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    </form>
                                                 </td>
+
+
                                                 <td class="project-title">
                                                     <h6><a href="javascript:void(0);">{{ $item->title }}</a></h6>
                                                     <small>{{ $item->start_date }}</small>
                                                 </td>
                                                 <td>
-                                                    {{ $item->due_date }}
+                                                    {{ $item->end_date }}
                                                 </td>
                                                 <td>
                                                     {{ $item->budget }}
                                                 </td>
                                                 <td>
-                                                    @php
-                                                        $priority = $item->priority;
-                                                    @endphp
-
-                                                    <!-- Define the color codes or labels for each priority level -->
-                                                    <span class="priority-level priority-{{ $priority }}">
-                                                        @switch($priority)
-                                                            @case('low')
-                                                                Low
-                                                            @break
-
-                                                            @case('medium')
-                                                                Medium
-                                                            @break
-
-                                                            @case('high')
-                                                                High
-                                                            @break
-
-                                                            @case('urgent')
-                                                                Urgent
-                                                            @break
-
-                                                            @case('critical')
-                                                                Critical
-                                                            @break
-
-                                                            @default
-                                                                Unknown
-                                                        @endswitch
-                                                    </span>
+                                                    {{ $item->client }}
                                                 </td>
-
                                                 <td>
                                                     <ul class="list-unstyled team-info">
                                                         <li><img src="{{ url('assets/images/xs/avatar1.jpg') }}"
@@ -213,8 +238,7 @@
 
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.js-sweetalert').forEach(link => {

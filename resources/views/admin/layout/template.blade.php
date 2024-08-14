@@ -9,6 +9,7 @@
     <meta name="author" content="WrapTheme, design by: ThemeMakker.com">
 
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -180,6 +181,8 @@
 
 
     </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="https://embed.tawk.to/_s/v4/app/66909c6d5c9/js/twk-main.js" charset="UTF-8" crossorigin="*"></script>
     <script src="https://embed.tawk.to/_s/v4/app/66909c6d5c9/js/twk-vendor.js" charset="UTF-8" crossorigin="*"></script>
@@ -193,7 +196,10 @@
 
     <!-- page js file -->
     <script src="{{ url('assets/bundles/mainscripts.bundle.js') }}"></script>
+    <script src="{{ url('assets/js/multiselect-dropdown.js') }}"></script>
     {{-- <script src="{{ url('js/iot.js') }}"></script> --}}
+
+
 
 </body>
 

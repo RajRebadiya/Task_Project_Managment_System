@@ -57,4 +57,18 @@ class User extends Authenticatable
             ->withPivot('role_id')
             ->withTimestamps();
     }
+
+    public function projectCount()
+    {
+        return $this->projects()->count();
+    }
+
+    // In User.php model
+    public function projectsWithRoles()
+    {
+        return $this->belongsToMany(Project::class, 'project_user')
+            ->withPivot('role_id')
+            ->join('roles', 'project_user.role_id', '=', 'roles.id')
+            ->select('projects.*', 'roles.role_name');
+    }
 }

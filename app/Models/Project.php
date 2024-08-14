@@ -21,4 +21,9 @@ class Project extends Model
     {
         return Role::where('id', $roleId)->pluck('role_name')->first();
     }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
 }
