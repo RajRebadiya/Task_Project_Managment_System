@@ -54,5 +54,6 @@ Route::controller(ProjectController::class)->middleware('redirectIfAuthenticated
         Route::post('/edit-project', 'edit_project')->name('edit_project');
         Route::get('/delete-project/{id}', 'delete_project')->name('delete_project');
         Route::post('/update-status', 'update_status')->name('update-status');
+        Route::post('/update-user', 'update_user')->name('update-user');
     });
 });

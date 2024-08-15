@@ -190,4 +190,23 @@ class ProjectController extends Controller
         $project->save();
         return redirect()->route('projects')->with('success', 'Project status changed');
     }
+
+    public function update_user(Request $request)
+    {
+        $project = Project::find($request->project_id);
+        // dd($request->project_id);
+
+
+        $project->users()->wherePivot('role_id', 2)->detach();
+
+        // dd('all users deleted');
+        $developers = $request->developers;
+        if ($developers == null) {
+            return response()->json(['success' => 'User updated successfully.', 'project_user' => $project->users()->wherePivot('role_id', 2)->get()]);
+        }
+        foreach ($developers as $userId) {
+            $project->users()->attach($userId, ['role_id' => 2]); // Attach developers
+        }
+        return response()->json(['success' => 'User updated successfully.', 'project_user' => $project->users()->wherePivot('role_id', 2)->get()]);
+    }
 }

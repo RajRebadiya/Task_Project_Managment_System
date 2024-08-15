@@ -13,14 +13,15 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <!-- Bootstrap JS (optional, for dismissible alerts) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
     <!-- VENDOR CSS -->
     <link rel="stylesheet" href="{{ url('assets/vendor/bootstrap/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/vendor/font-awesome/css/font-awesome.min.css') }}">
 
     <!-- MAIN CSS -->
+
     <link rel="stylesheet" href="{{ url('assets/css/main.css') }}">
+    @yield('css')
 
 </head>
 
@@ -181,7 +182,6 @@
 
 
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="https://embed.tawk.to/_s/v4/app/66909c6d5c9/js/twk-main.js" charset="UTF-8" crossorigin="*"></script>
