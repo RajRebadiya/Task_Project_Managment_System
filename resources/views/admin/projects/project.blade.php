@@ -1,55 +1,74 @@
 @extends('admin.layout.template')
 
 @section('title', 'Project')
-<link rel="stylesheet" href="assets/vendor/sweetalert/sweetalert.css" />
-<style>
-    .dropdown-toggle::after {
-        display: none;
-        /* Hide the default dropdown arrow */
-    }
 
-    .dropdown-menu {
-        min-width: 160px;
-        /* Set minimum width for the dropdown menu */
-    }
+@section('css')
 
-    .dropdown-item {
-        cursor: pointer;
-    }
+    <link rel="stylesheet" href="{{ asset('assets/vendor/jquery-datatable/dataTables.bootstrap4.min.css') }}">
+    <link rel="stylesheet"
+        href="{{ asset('assets/vendor/jquery-datatable/fixedeader/dataTables.fixedcolumns.bootstrap4.min.css') }}">
+    <link rel="stylesheet"
+        href="{{ asset('assets/vendor/jquery-datatable/fixedeader/dataTables.fixedheader.bootstrap4.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/sweetalert/sweetalert.css') }}">
 
-    .dropdown-item.active {
-        font-weight: bold;
-        color: #fff;
-    }
+    <style>
+        td.details-control {
+            background: url('assets/images/details_open.png') no-repeat center center;
+            cursor: pointer;
+        }
 
-    .bg-success {
-        background-color: #28a745 !important;
-        /* Green */
-    }
+        tr.shown td.details-control {
+            background: url('assets/images/details_close.png') no-repeat center center;
+        }
 
-    .bg-warning {
-        background-color: #ffc107 !important;
-        /* Yellow */
-    }
+        .dropdown-toggle::after {
+            display: none;
+            /* Hide the default dropdown arrow */
+        }
 
-    .bg-danger {
-        background-color: #dc3545 !important;
-        /* Red */
-    }
+        .dropdown-menu {
+            min-width: 160px;
+            /* Set minimum width for the dropdown menu */
+        }
 
-    .bg-secondary {
-        background-color: #6c757d !important;
-        /* Gray */
-    }
+        .dropdown-item {
+            cursor: pointer;
+        }
 
-    .text-white {
-        color: #fff !important;
-    }
+        .dropdown-item.active {
+            font-weight: bold;
+            color: #fff;
+        }
 
-    .text-dark {
-        color: #343a40 !important;
-    }
-</style>
+        .bg-success {
+            background-color: #28a745 !important;
+            /* Green */
+        }
+
+        .bg-warning {
+            background-color: #ffc107 !important;
+            /* Yellow */
+        }
+
+        .bg-danger {
+            background-color: #dc3545 !important;
+            /* Red */
+        }
+
+        .bg-secondary {
+            background-color: #6c757d !important;
+            /* Gray */
+        }
+
+        .text-white {
+            color: #fff !important;
+        }
+
+        .text-dark {
+            color: #343a40 !important;
+        }
+    </style>
+@endsection
 
 
 
@@ -84,23 +103,32 @@
             @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             @endif
 
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
             @endif
 
+
             <div class="row clearfix">
-                <div class="col-lg-12 col-md-12">
+                <div class="col-lg-12">
                     <div class="card">
-                        <div class="body project_report">
+                        <div class="header">
+                            <h2>Basic Table <small>Basic example without any additional modification classes</small> </h2>
+                        </div>
+                        <div class="body">
                             <div class="table-responsive">
-                                <table class="table mb-0 table-hover">
+                                <table id="DemoTable"
+                                    class="table table-bordered table-hover js-basic-example dataTable table-custom">
                                     <thead class="thead-light">
                                         <tr>
                                             <th>Status</th>
@@ -112,6 +140,17 @@
                                             <th>Action</th>
                                         </tr>
                                     </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Project</th>
+                                            <th>Due Date</th>
+                                            <th>Budget</th>
+                                            <th>Client</th>
+                                            <th>Team</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </tfoot>
                                     <tbody>
                                         @foreach ($projects as $item)
                                             <tr>
@@ -124,52 +163,50 @@
                                                             'completed' => 'bg-dark text-white',
                                                             'on_hold' => 'bg-warning text-dark',
                                                             'pending' => 'bg-danger text-white',
-                                                            'active' => 'bg-success text-white',
                                                         ];
                                                         $statusClass =
                                                             $statusColors[$status] ?? 'bg-secondary text-white';
                                                     @endphp
 
-                                                    <!-- Form to update the status -->
-                                                    <form action="{{ route('update-status') }}" method="POST"
-                                                        class="d-inline">
-                                                        @csrf
-
-                                                        <!-- Dropdown for selecting status -->
-                                                        <div class="dropdown">
-                                                            <button
-                                                                class="btn {{ $statusClass }} form-control form-control-sm dropdown-toggle"
-                                                                type="button" id="dropdownMenuButton"
-                                                                data-bs-toggle="dropdown" aria-expanded="false">
-                                                                {{ ucfirst($status) }}
-                                                            </button>
-                                                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                                                                @foreach (['active', 'completed', 'on_hold', 'pending'] as $statusOption)
-                                                                    @php
-                                                                        $statusOptionClass =
-                                                                            $statusColors[$statusOption];
-                                                                    @endphp
-                                                                    <li>
-                                                                        <a class="dropdown-item {{ $status == $statusOption ? 'active ' . $statusOptionClass : $statusOptionClass }}"
-                                                                            href="javascript:void(0);"
-                                                                            onclick="event.preventDefault(); document.getElementById('status-form-{{ $item->id }}-{{ $statusOption }}').submit();">
-                                                                            {{ ucfirst($statusOption) }}
-                                                                        </a>
-                                                                        <form
-                                                                            id="status-form-{{ $item->id }}-{{ $statusOption }}"
-                                                                            action="{{ route('update-status') }}"
-                                                                            method="POST" style="display: none;">
-                                                                            @csrf
-                                                                            <input type="hidden" name="status"
-                                                                                value="{{ $statusOption }}">
-                                                                            <input type="hidden" name="id"
-                                                                                value="{{ $item->id }}">
-                                                                        </form>
-                                                                    </li>
-                                                                @endforeach
-                                                            </ul>
+                                                    <!-- Dropdown for selecting status -->
+                                                    <div class="dropdown">
+                                                        <button class="btn {{ $statusClass }} dropdown-toggle"
+                                                            type="button" id="dropdownMenuButton{{ $item->id }}"
+                                                            data-toggle="dropdown" aria-haspopup="true"
+                                                            aria-expanded="false">
+                                                            {{ ucfirst($status) }}
+                                                        </button>
+                                                        <div class="dropdown-menu"
+                                                            aria-labelledby="dropdownMenuButton{{ $item->id }}">
+                                                            @foreach (['active', 'completed', 'on_hold', 'pending'] as $statusOption)
+                                                                @php
+                                                                    $statusOptionClass = $statusColors[$statusOption];
+                                                                @endphp
+                                                                <a class="dropdown-item {{ $status == $statusOption ? 'active ' . $statusOptionClass : $statusOptionClass }}"
+                                                                    href="javascript:void(0);"
+                                                                    onclick="changeStatus('{{ $item->id }}', '{{ $statusOption }}')">
+                                                                    {{ ucfirst($statusOption) }}
+                                                                </a>
+                                                            @endforeach
                                                         </div>
+                                                    </div>
+
+                                                    <!-- Hidden form for status update -->
+                                                    <form id="status-form-{{ $item->id }}"
+                                                        action="{{ route('update-status') }}" method="POST"
+                                                        style="display: none;">
+                                                        @csrf
+                                                        <input type="hidden" name="status"
+                                                            id="status-input-{{ $item->id }}">
+                                                        <input type="hidden" name="id" value="{{ $item->id }}">
                                                     </form>
+
+                                                    <script>
+                                                        function changeStatus(itemId, status) {
+                                                            document.getElementById('status-input-' + itemId).value = status;
+                                                            document.getElementById('status-form-' + itemId).submit();
+                                                        }
+                                                    </script>
                                                 </td>
 
 
@@ -234,10 +271,27 @@
                         </div>
                     </div>
                 </div>
+
             </div>
 
         </div>
     </div>
+
+@section('script')
+    <!-- Javascript -->
+
+
+    <script src="{{ asset('assets/bundles/datatablescripts.bundle.js') }}"></script>
+    <script src="{{ asset('js/pages/tables/jquery-datatable.js') }}"></script>
+    <script src="{{ asset('assets/vendor/jquery-datatable/buttons/dataTables.buttons.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/jquery-datatable/buttons/buttons.bootstrap4.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/jquery-datatable/buttons/buttons.colVis.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/jquery-datatable/buttons/buttons.html5.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/jquery-datatable/buttons/buttons.print.min.js') }}"></script>
+    <script src="{{ asset('assets/js/sweetalert.js') }}"></script>
+
+
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -247,7 +301,6 @@
                     const url = this.getAttribute('data-url'); // Get the URL from data attribute
                     const formId = 'delete-form-' + url.split('/')
                         .pop(); // Generate form ID based on URL
-
                     Swal.fire({
                         title: 'Are you sure?',
                         text: "You won't be able to revert this!",
@@ -266,5 +319,7 @@
             });
         });
     </script>
+
+@endsection
 
 @endsection

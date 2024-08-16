@@ -2642,9 +2642,9 @@ html.fullscreen-bg #wrapper {
 .nav-tabs .dropdown-menu {
     transform: none !important;
 }
-.tab-content {
-    padding: 15px;
-}
+/* .tab-content {
+   
+} */
 .nav-tabs-colored > li.active > a,
 .nav-tabs-colored > li.active > a:hover,
 .nav-tabs-colored > li.active > a:focus {

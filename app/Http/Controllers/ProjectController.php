@@ -209,4 +209,18 @@ class ProjectController extends Controller
         }
         return response()->json(['success' => 'User updated successfully.', 'project_user' => $project->users()->wherePivot('role_id', 2)->get()]);
     }
+
+    public function table()
+    {
+        if (Auth::guard('admin')->check()) {
+            $projects = Project::all();
+            return view('admin.projects.table', compact('projects'));
+        } else if (Auth::guard('web')->check()) {
+            $users = Auth::guard('web')->user();
+            $project = $users->projectsWithRoles;
+            return view('users.table', compact('users', 'project'));
+        } else {
+            return redirect('/login');
+        }
+    }
 }

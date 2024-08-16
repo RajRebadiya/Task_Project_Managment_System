@@ -10,9 +10,6 @@
 
     <link rel="icon" href="favicon.ico" type="image/x-icon">
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> --}}
     <!-- VENDOR CSS -->
     <link rel="stylesheet" href="{{ url('assets/vendor/bootstrap/css/bootstrap.min.css') }}">
@@ -182,22 +179,19 @@
 
 
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script src="https://embed.tawk.to/_s/v4/app/66909c6d5c9/js/twk-main.js" charset="UTF-8" crossorigin="*"></script>
-    <script src="https://embed.tawk.to/_s/v4/app/66909c6d5c9/js/twk-vendor.js" charset="UTF-8" crossorigin="*"></script>
-
-    <!-- Javascript -->
-    <script src="{{ url('assets/bundles/libscripts.bundle.js') }}"></script>
-    <script src="{{ url('assets/bundles/vendorscripts.bundle.js') }}"></script>
-
-    <!-- page vendor js file -->
-    <script src="assets/bundles/c3.bundle.js"></script>
+    <script src="{{ asset('assets/bundles/libscripts.bundle.js') }}"></script>
+    <script src="{{ asset('assets/bundles/vendorscripts.bundle.js') }}"></script>
+    <script src="{{ asset('assets/vendor/sweetalert/sweetalert.min.js') }}"></script> <!-- SweetAlert Plugin Js -->
 
     <!-- page js file -->
-    <script src="{{ url('assets/bundles/mainscripts.bundle.js') }}"></script>
-    <script src="{{ url('assets/js/multiselect-dropdown.js') }}"></script>
-    {{-- <script src="{{ url('js/iot.js') }}"></script> --}}
+    <script src="{{ asset('assets/bundles/mainscripts.bundle.js') }}"></script>
+
+
+    <script src="{{ asset('assets/js/multiselect-dropdown.js') }}"></script>
+
+    @yield('script')
+
 
 
 
