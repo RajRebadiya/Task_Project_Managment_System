@@ -187,6 +187,9 @@
     <!-- page js file -->
     <script src="{{ asset('assets/bundles/mainscripts.bundle.js') }}"></script>
 
+    {{-- Toaster --}}
+    <script src="{{ asset('assets/vendor/toastr/toastr.js') }}"></script>
+
 
     <script src="{{ asset('assets/js/multiselect-dropdown.js') }}"></script>
 

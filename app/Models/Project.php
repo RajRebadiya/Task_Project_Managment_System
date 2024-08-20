@@ -26,4 +26,9 @@ class Project extends Model
     {
         return $this->belongsTo(Role::class);
     }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class);
+    }
 }

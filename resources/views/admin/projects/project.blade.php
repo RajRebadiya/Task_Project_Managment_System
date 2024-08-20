@@ -3,6 +3,7 @@
 @section('title', 'Project')
 
 @section('css')
+    <link rel="stylesheet" href="{{ asset('assets/vendor/toastr/toastr.min.css') }}">
 
     <link rel="stylesheet" href="{{ asset('assets/vendor/jquery-datatable/dataTables.bootstrap4.min.css') }}">
     <link rel="stylesheet"
@@ -41,17 +42,17 @@
         }
 
         .bg-success {
-            background-color: #28a745 !important;
+            background-color: #45c763cc !important;
             /* Green */
         }
 
         .bg-warning {
-            background-color: #ffc107 !important;
+            background-color: #ffcc33 !important;
             /* Yellow */
         }
 
         .bg-danger {
-            background-color: #dc3545 !important;
+            background-color: #dc3545c4 !important;
             /* Red */
         }
 
@@ -117,6 +118,7 @@
                     </button>
                 </div>
             @endif
+
 
 
             <div class="row clearfix">
@@ -211,7 +213,9 @@
 
 
                                                 <td class="project-title">
-                                                    <h6><a href="javascript:void(0);">{{ $item->title }}</a></h6>
+                                                    <h6><a
+                                                            href="{{ route('project_detail', ['id' => $item->id]) }}">{{ $item->title }}</a>
+                                                    </h6>
                                                     <small>{{ $item->start_date }}</small>
                                                 </td>
                                                 <td>

@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\Client;
+use App\Models\Task;
 use Illuminate\Support\Facades\Auth;
 
 class ProjectController extends Controller
@@ -105,8 +106,9 @@ class ProjectController extends Controller
             $project = Project::find($id);
             $users = User::all();
             $roles = Role::all();
+            $data = Task::where('project_id', $id)->get();
             // dd($project);
-            return view('admin.projects.project_detail', compact('project', 'users', 'roles'));
+            return view('admin.projects.project_detail', compact('project', 'users', 'roles', 'data'));
         } else if (Auth::guard('web')->check()) {
             $users = Auth::guard('web')->user();
             $project = $users->projectsWithRoles;

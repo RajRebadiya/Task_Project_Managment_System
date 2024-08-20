@@ -71,4 +71,9 @@ class User extends Authenticatable
             ->join('roles', 'project_user.role_id', '=', 'roles.id')
             ->select('projects.*', 'roles.role_name');
     }
+
+    public function tasks()
+    {
+        return $this->belongsToMany(Task::class, 'task_user_project')->withTimestamps();
+    }
 }

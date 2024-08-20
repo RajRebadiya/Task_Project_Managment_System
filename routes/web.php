@@ -4,6 +4,7 @@ use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 
 /*
 |--------------------------------------------------------------------------
@@ -57,4 +58,18 @@ Route::controller(ProjectController::class)->middleware('redirectIfAuthenticated
         Route::post('/update-user', 'update_user')->name('update-user');
         Route::get('/table', 'table')->name('table');
     });
+});
+
+Route::controller(TaskController::class)->middleware('redirectIfAuthenticated')->group(function () {
+    Route::post('/add-task', 'add_task')->name('add-task');
+    Route::post('update-priority', 'update_priority')->name('update-priority');
+    Route::post('update-due_date', 'update_due_date')->name('update-due_date');
+    Route::get('get-tags', 'get_tags')->name('get-tags');
+    Route::post('update-tags', 'update_tags')->name('update-tags');
+    Route::post('update-estimated_time', 'update_estimated_time')->name('update-estimated_time');
+    Route::post('update-developers', 'update_developers')->name('update-developers');
+    Route::post('update-task-status', 'update_task_status')->name('update-task-status');
+    Route::get('task-delete/{id}', 'delete_task')->name('task-delete');
+
+    Route::post('update-task-tags', 'update_task_tags')->name('update-task-tags');
 });
