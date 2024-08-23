@@ -192,4 +192,46 @@ class TaskController extends Controller
 
         return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Task updated successfully');
     }
+
+    public function update_developers(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'task_id' => 'required',
+            'project_id' => 'required',
+            'developers' => 'required|array',
+        ]);
+
+        $task = Task::find($request->task_id);
+
+        // Detach all existing relationships
+        $task->users()->detach();
+        $member = $request->developers;
+        // dd($member);
+
+        foreach ($member as $key => $value) {
+            $task->users()->attach($value, ['project_id' => $request->project_id]);
+        }
+        $task->save();
+        if (!$task) {
+            return redirect()->route('projects')->with('error', 'Task not updated');
+        }
+
+        return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Member updated successfully');
+    }
+
+    public function add_new_tag(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'tag' => 'required',
+        ]);
+
+        $tag = Tag::firstOrCreate(['name' => $request->tag]);
+        if (!$tag) {
+            return redirect()->route('projects')->with('error', 'Tag not added');
+        }
+
+        return redirect()->back()->with('success', 'Tag added successfully');
+    }
 }

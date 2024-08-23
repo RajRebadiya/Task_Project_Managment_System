@@ -66,6 +66,7 @@ Route::controller(TaskController::class)->middleware('redirectIfAuthenticated')-
     Route::post('update-due_date', 'update_due_date')->name('update-due_date');
     Route::get('get-tags', 'get_tags')->name('get-tags');
     Route::post('update-tags', 'update_tags')->name('update-tags');
+    Route::post('add-new-tag', 'add_new_tag')->name('add-new-tag');
     Route::post('update-estimated_time', 'update_estimated_time')->name('update-estimated_time');
     Route::post('update-developers', 'update_developers')->name('update-developers');
     Route::post('update-task-status', 'update_task_status')->name('update-task-status');

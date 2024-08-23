@@ -143,6 +143,15 @@
             padding: 0;
             margin: 0;
             z-index: 1000;
+            width: 225px;
+        }
+
+        .tag-suggestions .merge {
+            padding: 5px 4px;
+            border-radius: 6px;
+            background: #ed3434;
+            color: white;
+            width: 65px;
         }
 
         .tag-suggestions li {
@@ -161,6 +170,18 @@
 
         .task-table td {
             padding: 0;
+        }
+
+        .multiselect-dropdown {
+            width: 80% !important;
+
+            /* display: none !; */
+        }
+
+        .multiselect-dropdown-list-wrapper {
+            display: block;
+            margin-top: 30px;
+            width: 167%;
         }
     </style>
 @endsection
@@ -411,10 +432,10 @@
                                                     <tbody>
                                                         @foreach ($data as $item)
                                                             @if ($item->status == 'todo')
-                                                                <tr>
-                                                                    <td class='mar-pad' contenteditable="false">
+                                                                <tr class='col-md-12' data-id="{{ $item->id }}">
+                                                                    <td class='col-md-2' contenteditable="false">
                                                                         {{ $item->title }}</td>
-                                                                    <td class="status-cell"
+                                                                    <td class="status-cell  col-md-1"
                                                                         data-id="{{ $item->id }}">
                                                                         <span
                                                                             class="status-display">{{ ucfirst($item->status) }}</span>
@@ -438,88 +459,136 @@
                                                                         </select>
                                                                     </td>
 
-                                                                    <td>
+                                                                    <td class='col-md-2' style='align-items:center'>
                                                                         @php
-                                                                            $userCount = count($developers);
-                                                                            $displayUsers =
-                                                                                $userCount > 3
-                                                                                    ? array_slice($developers, 0, 3)
-                                                                                    : $developers;
+                                                                            $task = \App\Models\Task::find($item->id);
+                                                                            $task_user = $task->users;
+                                                                            // dd($task_user);
                                                                         @endphp
 
                                                                         <ul class="list-unstyled team-info d-flex">
-                                                                            @foreach ($displayUsers as $userId)
-                                                                                @php
-                                                                                    $user = $users->firstWhere(
-                                                                                        'id',
-                                                                                        $userId,
-                                                                                    );
-                                                                                @endphp
-                                                                                @if ($user)
-                                                                                    <li style="display: inline-block; cursor: pointer;"
-                                                                                        onclick="toggleSelect(this, '{{ $user->id }}')">
-                                                                                        <img src="{{ url('assets/images/xs/avatar2.jpg') }}"
-                                                                                            alt="{{ $user->name }}"
-                                                                                            title="{{ $user->name }}"
-                                                                                            style="width: 20px; height: 20px; border-radius: 50%;">
-                                                                                    </li>
-                                                                                @endif
+                                                                            @foreach ($task_user as $userId)
+                                                                                <li
+                                                                                    style="display: inline-block; cursor: pointer;">
+                                                                                    <img src="{{ url('assets/images/xs/avatar2.jpg') }}"
+                                                                                        id='user-id-user'
+                                                                                        alt="{{ $userId->name }}"
+                                                                                        title="{{ $userId->name }}"
+                                                                                        style="width: 20px; height: 20px; border-radius: 50%;">
+                                                                                </li>
                                                                             @endforeach
-
-                                                                            @if ($userCount > 3)
-                                                                                <span
-                                                                                    title="{{ $userCount - 3 }} more users">+{{ $userCount - 3 }}</span>
-                                                                            @endif
+                                                                            <span type="button" id=''><i
+                                                                                    class="fa fa-plus user-id-add"></i></span>
                                                                         </ul>
+                                                                        @php
+                                                                            $developers = $task->users;
 
-                                                                        {{-- <select name="developers[]" id="developers"
-                                                                                multiple="multiple" style="display: none;">
-                                                                                @foreach ($users as $user)
+                                                                            $dev_id = $developers
+                                                                                ->pluck('id')
+                                                                                ->toArray();
+                                                                            $pro_user = [];
+                                                                            foreach (
+                                                                                $project->users
+                                                                                as $index => $user
+                                                                            ) {
+                                                                                if (
+                                                                                    $project->getRoleNameById(
+                                                                                        $user->pivot->role_id,
+                                                                                    ) == 'developer'
+                                                                                ) {
+                                                                                    $pro_user[] = $user;
+                                                                                }
+                                                                            }
+                                                                            // dd($dev_id);
+                                                                        @endphp
+                                                                        {{-- <div id="user-id-container"> --}}
+                                                                        {{-- <select name="users[]" id="">
+                                                                            @foreach ($users as $item)
+                                                                                <option value="{{ $item->name }}"
+                                                                                    {{ in_array($item->id, $developers) ? 'selected' : '' }}>
+                                                                                    {{ $item->name }}
+                                                                                </option>
+                                                                            @endforeach
+                                                                        </select> --}}
+                                                                        {{-- </div>  --}}
+
+
+                                                                        <!-- Multi-select field for developers -->
+                                                                        <div id="user-id-container-{{ $item->id }}"
+                                                                            style="display: none">
+                                                                            <select name="users[]"
+                                                                                id="dev-data-{{ $item->id }}"
+                                                                                multiple="multiple" class="form-control"
+                                                                                multiselect-search="true"
+                                                                                multiselect-select-all="true"
+                                                                                multiselect-max-items="1" s>
+                                                                                @foreach ($pro_user as $user)
                                                                                     <option value="{{ $user->id }}"
-                                                                                        {{ in_array($user->id, $developers) ? 'selected' : '' }}>
+                                                                                        {{ in_array($user->id, $dev_id) ? 'selected' : '' }}>
                                                                                         {{ $user->name }}
                                                                                     </option>
                                                                                 @endforeach
-                                                                            </select> --}}
+                                                                            </select>
+                                                                        </div>
+
+
+
                                                                     </td>
 
 
 
 
                                                                     <td id="priority-cell-{{ $item->id }}"
-                                                                        class="priority-cell"
+                                                                        style='cursor:pointer; align-items: center;'
+                                                                        class="priority-cell col-md-1"
                                                                         data-id="{{ $item->id }}">
                                                                         @if ($item->priority == 'low')
                                                                             <i class="fa fa-flag" style="color:blue;"></i>
-                                                                            {{ strtoupper($item->priority) }}
                                                                         @elseif ($item->priority == 'medium')
                                                                             <i class="fa fa-flag"
                                                                                 style="color:orange;"></i>
-                                                                            {{ strtoupper($item->priority) }}
+                                                                        @elseif ($item->priority == 'high')
+                                                                            <i class="fa fa-flag"
+                                                                                style="color:rgb(230, 47, 47);"></i>
+                                                                        @elseif($item->priority == 'urgent')
+                                                                            <i class="fa fa-flag"
+                                                                                style="color:rgb(175, 6, 6);"></i>
                                                                         @else
-                                                                            <i class="fa fa-flag" style="color:red;"></i>
-                                                                            {{ strtoupper($item->priority) }}
+                                                                            <i class="fa fa-flag"
+                                                                                style="color:rgb(139, 135, 139);"></i>
                                                                         @endif
                                                                         <div class="dropdown-menu"
                                                                             id="priority-dropdown-{{ $item->id }}"
                                                                             style="display: none;">
-                                                                            <a href="#" data-priority="low">Low</a>
-                                                                            <a href="#"
-                                                                                data-priority="medium">Medium</a>
-                                                                            <a href="#"
-                                                                                data-priority="high">High</a>
+                                                                            <a href="#" data-priority="low"><i
+                                                                                    class="fa fa-flag mr-2"
+                                                                                    style="color:blue;"></i>Low</a>
+                                                                            <a href="#" data-priority="medium"><i
+                                                                                    class="fa fa-flag mr-2"
+                                                                                    style="color:orange;"></i>Medium</a>
+
+                                                                            <a href="#" data-priority="high"><i
+                                                                                    class='fa fa-flag mr-2'
+                                                                                    style='color:rgb(230, 47, 47);'></i>High</a>
+                                                                            <a href="#" data-priority="urgent"><i
+                                                                                    class='fa fa-flag mr-2'
+                                                                                    style='color:rgb(175, 6, 6);'></i>Urgent</a>
                                                                         </div>
                                                                     </td>
-                                                                    <td class="due-date-cell"
+                                                                    <td class="due-date-cell col-md-1"
+                                                                        style='cursor:pointer;'
                                                                         data-id="{{ $item->id }}">
                                                                         <span
-                                                                            class="due-date-display">{{ $item->due_date }}</span>
+                                                                            class="due-date-display">{{ \Carbon\Carbon::parse($item->due_date)->format('M d') }}</span>
                                                                         <input type="date" class="due-date-input"
                                                                             value="{{ $item->due_date }}"
                                                                             style="display: none;">
                                                                     </td>
 
-                                                                    <td class="estimated-time-cell"
+
+
+                                                                    <td class="estimated-time-cell col-md-1"
+                                                                        style='cursor:pointer;'
                                                                         data-id="{{ $item->id }}">
                                                                         <i class="fa fa-clock-o"></i>
                                                                         <span
@@ -530,12 +599,26 @@
                                                                             style="display: none;">
                                                                     </td>
 
-                                                                    <td class="tag-cell" data-id="{{ $item->id }}">
-                                                                        <i class="fa fa-tags"></i>
-                                                                        <div class="tag-container">
+
+                                                                    <td class="tag-cell" style='cursor:pointer;'
+                                                                        data-id="{{ $item->id }}" class='col-md-1'>
+                                                                        <i class="fa fa-tags"
+                                                                            id="tag-icon-{{ $item->id }}"></i>
+                                                                        <div class="tag-container"
+                                                                            style="display: inline">
                                                                             @foreach (explode(',', $item->tag) as $tag)
-                                                                                <span
-                                                                                    class="tag-item">{{ $tag }}</span>
+                                                                                @php
+                                                                                    $tag = trim($tag); // Trim any extra spaces
+                                                                                    $colors = $tagColors[$tag] ?? [
+                                                                                        'background' => '#f0f0f0',
+                                                                                        'text' => '#000000',
+                                                                                        'icon' => '#000000',
+                                                                                    ];
+                                                                                @endphp
+                                                                                <span class="tag-item"
+                                                                                    style="background-color: {{ $colors['background'] }}; color: {{ $colors['text'] }};">
+                                                                                    {{ $tag }}
+                                                                                </span>
                                                                             @endforeach
                                                                             <input type="text" class="tag-input"
                                                                                 style="display: none;"
@@ -548,7 +631,8 @@
 
 
 
-                                                                    <td>
+
+                                                                    <td class="col-md-1">
                                                                         <a href='javascript:void(0);'
                                                                             data-url="{{ route('task-delete', ['id' => $item->id]) }}"
                                                                             class="btn btn-outline-danger js-sweetalert"
@@ -570,7 +654,7 @@
                                                     </tbody>
                                                 </table>
                                             </div>
-                                            <hr>
+                                            {{-- <hr>
                                             <h5 style='margin:0px;' class='text-warning'>In Progress</h5>
                                             <div id="in_progress-section" class="task-design ">
                                                 <table class="task-table">
@@ -621,31 +705,33 @@
                                                                                     );
                                                                                 @endphp
                                                                                 @if ($user)
-                                                                                    <li style="display: inline-block; cursor: pointer;"
-                                                                                        onclick="toggleSelect(this, '{{ $user->id }}')">
+                                                                                    <li
+                                                                                        style="display: inline-block; cursor: pointer;">
                                                                                         <img src="{{ url('assets/images/xs/avatar2.jpg') }}"
+                                                                                            id='user-id-user'
                                                                                             alt="{{ $user->name }}"
                                                                                             title="{{ $user->name }}"
                                                                                             style="width: 20px; height: 20px; border-radius: 50%;">
                                                                                     </li>
                                                                                 @endif
                                                                             @endforeach
-
-                                                                            @if ($userCount > 3)
-                                                                                <span
-                                                                                    title="{{ $userCount - 3 }} more users">+{{ $userCount - 3 }}</span>
-                                                                            @endif
+                                                                            <button type="button" id='user-id-add'
+                                                                                class="btn btn-primary btn-sm"><i
+                                                                                    class="fa fa-plus"></i></button>
                                                                         </ul>
 
-                                                                        {{-- <select name="developers[]" id="developers"
-                                                                    multiple="multiple" style="display: none;">
-                                                                    @foreach ($users as $user)
-                                                                        <option value="{{ $user->id }}"
-                                                                            {{ in_array($user->id, $developers) ? 'selected' : '' }}>
-                                                                            {{ $user->name }}
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select> --}}
+                                                                        <select name="developers[]" id="developers"
+                                                                            multiple="multiple" class="form-control"
+                                                                            multiselect-search ='true'
+                                                                            multiselect-select-all = 'true'>
+                                                                            @foreach ($users as $user)
+                                                                                <option value="{{ $user->id }}"
+                                                                                    {{ in_array($user->id, $developers) ? 'selected' : '' }}>
+                                                                                    {{ $user->name }}
+                                                                                </option>
+                                                                            @endforeach
+
+                                                                        </select>
                                                                     </td>
 
 
@@ -799,16 +885,6 @@
                                                                                     title="{{ $userCount - 3 }} more users">+{{ $userCount - 3 }}</span>
                                                                             @endif
                                                                         </ul>
-
-                                                                        {{-- <select name="developers[]" id="developers"
-                                                                    multiple="multiple" style="display: none;">
-                                                                    @foreach ($users as $user)
-                                                                        <option value="{{ $user->id }}"
-                                                                            {{ in_array($user->id, $developers) ? 'selected' : '' }}>
-                                                                            {{ $user->name }}
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select> --}}
                                                                     </td>
 
 
@@ -963,15 +1039,7 @@
                                                                             @endif
                                                                         </ul>
 
-                                                                        {{-- <select name="developers[]" id="developers"
-                                                                    multiple="multiple" style="display: none;">
-                                                                    @foreach ($users as $user)
-                                                                        <option value="{{ $user->id }}"
-                                                                            {{ in_array($user->id, $developers) ? 'selected' : '' }}>
-                                                                            {{ $user->name }}
-                                                                        </option>
-                                                                    @endforeach
-                                                                </select> --}}
+
                                                                     </td>
 
 
@@ -1125,15 +1193,7 @@
                                                                             @endif
                                                                         </ul>
 
-                                                                        {{-- <select name="developers[]" id="developers"
-                                                                            multiple="multiple" style="display: none;">
-                                                                            @foreach ($users as $user)
-                                                                                <option value="{{ $user->id }}"
-                                                                                    {{ in_array($user->id, $developers) ? 'selected' : '' }}>
-                                                                                    {{ $user->name }}
-                                                                                </option>
-                                                                            @endforeach
-                                                                        </select> --}}
+
                                                                     </td>
 
 
@@ -1220,7 +1280,7 @@
                                                         @endforeach
                                                     </tbody>
                                                 </table>
-                                            </div>
+                                            </div> --}}
 
                                         </div>
 
@@ -1246,6 +1306,82 @@
 
     <script>
         $(document).ready(function() {
+
+            $('.user-id-add').on('click', function() {
+                var taskId = $(this).closest('tr').data('id');
+                console.log('task_id: ' + taskId);
+                $('#user-id-container-' + taskId).toggle('1000');
+
+                $('#dev-data-' + taskId).on('change', function() {
+                    // Get the selected values
+                    var selectedValues = $(this).val();
+                    var taskId = $(this).closest('tr').data('id');
+                    console.log('task_id: ' + taskId);
+
+
+                    $.ajax({
+                        url: '{{ route('update-developers') }}', // Your route to update developers
+                        method: 'POST',
+                        data: {
+                            task_id: taskId,
+                            developers: selectedValues,
+                            project_id: "{{ $project->id }}", // Ensure you pass the project ID
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            console.log(
+                                response); // Handle the response from the server
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(xhr.responseText); // Handle any errors
+                        }
+                    });
+                });
+            });
+
+
+            // Handle change event in the select dropdown
+            // $('#dev').on('change', function() {
+
+            //     // Select the element
+            //     const tagCell = document.querySelector('.tag-cell');
+
+            //     // Get the data-id attribute value
+            //     const itemId = tagCell.getAttribute('data-id');
+
+            //     console.log(itemId); // Outputs the value of data-id
+            //     // Get the selected values
+            //     var selectedUsers = $(this).val();
+            //     console.log('Selected users:', selectedUsers);
+
+            //     // Make AJAX request to submit the selected users
+            //     $.ajax({
+            //         url: '{{ route('update-developers') }}', // Your route to update developers
+            //         method: 'POST',
+            //         data: {
+            //             developers: selectedUsers,
+            //             project_id: "{{ $project->id }}", // Ensure you pass the project ID
+            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
+            //         },
+            //         success: function(response) {
+            //             console.log('Developers updated:', response);
+            //             // You can update the UI or show a success message here
+            //         },
+            //         error: function(xhr) {
+            //             console.error('Error:', xhr.responseText);
+            //         }
+            //     });
+            // });
+
+
+
+
+
+
+
+
+
+
             $('#add-user').on('click', function() {
                 $('#developers').show();
                 $('.multiselect-dropdown').css('width', '80%');
@@ -1288,107 +1424,70 @@
                 cell.addEventListener('click', function() {
                     const dropdown = document.getElementById('priority-dropdown-' + this.dataset
                         .id);
-                    dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+                    if (dropdown) {
+                        const isVisible = dropdown.style.display === 'block';
+
+                        // Hide all dropdowns
+                        document.querySelectorAll('.priority-dropdown').forEach(dropdown => {
+                            dropdown.style.display = 'none';
+                        });
+
+                        // Toggle the clicked dropdown
+                        dropdown.style.display = isVisible ? 'none' : 'block';
+                    }
                 });
             });
 
-            document.querySelectorAll('.dropdown-menu a').forEach(item => {
-                item.addEventListener('click', function(e) {
+            // Delegate event handling for dynamically added dropdown menu items
+            document.addEventListener('click', function(e) {
+                if (e.target.matches('.dropdown-menu a')) {
                     e.preventDefault();
-                    const cellId = this.closest('.priority-cell').dataset.id;
-                    const priority = this.dataset.priority;
+                    const item = e.target;
+                    const cellId = item.closest('.priority-cell').dataset.id;
+                    const priority = item.dataset.priority;
                     const cell = document.getElementById('priority-cell-' + cellId);
                     const dropdown = document.getElementById('priority-dropdown-' + cellId);
 
-                    // Update the priority display
-                    let color;
-                    if (priority === 'low') color = 'blue';
-                    else if (priority === 'medium') color = 'orange';
-                    else color = 'red';
+                    if (cell && dropdown) {
+                        // Update the priority display
+                        let color;
+                        if (priority === 'low') color = 'blue';
+                        else if (priority === 'medium') color = 'orange';
+                        else if (priority === 'high') color = 'rgb(230, 47, 47)';
+                        else if (priority === 'urgent') color = 'rgb(175, 6, 6)';
+                        else color = 'rgb(139, 135, 139)';
 
-                    cell.innerHTML =
-                        `<i class="fa fa-flag" style="color:${color};"></i> ${priority.toUpperCase()}`;
-                    dropdown.style.display = 'none';
+                        cell.innerHTML = `<i class="fa fa-flag" style="color:${color};"></i>`;
+                        dropdown.style.display = 'none';
 
-                    // Send an AJAX request to update the priority in the database
-                    $.ajax({
-                        url: '{{ route('update-priority') }}', // Use your route name here
-                        method: 'POST',
-                        data: {
-                            id: cellId,
-                            priority: priority,
-                            project_id: "{{ $project->id }}",
-                            _token: $('meta[name="csrf-token"]').attr(
-                                'content') // CSRF token
-                        },
-                        success: function(response) {
-                            // Optionally handle the response if needed
-                            console.log('Priority updated:', response);
-                        },
-                        error: function(xhr) {
-                            console.error('Error:', xhr.responseText);
-                        }
-                    });
-                });
-            });
-
-            // Close dropdown if clicking outside
-            document.addEventListener('click', function(event) {
-                if (!event.target.closest('.priority-cell')) {
-                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-                        menu.style.display = 'none';
+                        // Send an AJAX request to update the priority in the database
+                        $.ajax({
+                            url: '{{ route('update-priority') }}',
+                            method: 'POST',
+                            data: {
+                                id: cellId,
+                                priority: priority,
+                                project_id: "{{ $project->id }}",
+                                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
+                            },
+                            success: function(response) {
+                                // Optionally handle the response if needed
+                                console.log('Priority updated:', response);
+                            },
+                            error: function(xhr) {
+                                console.error('Error:', xhr.responseText);
+                            }
+                        });
+                    }
+                } else if (!e.target.closest('.priority-cell')) {
+                    // Close dropdown if clicking outside
+                    document.querySelectorAll('.priority-dropdown').forEach(dropdown => {
+                        dropdown.style.display = 'none';
                     });
                 }
             });
 
-            const sells = document.querySelectorAll('.due-date-cell');
 
-            sells.forEach(cell => {
-                cell.addEventListener('click', function() {
-                    const display = this.querySelector('.due-date-display');
-                    const input = this.querySelector('.due-date-input');
-
-                    // Toggle between display and input
-                    if (input.style.display === 'none') {
-                        input.style.display = 'block';
-                        display.style.display = 'none';
-                        input.focus();
-                    } else {
-                        input.style.display = 'none';
-                        display.style.display = 'block';
-                    }
-                });
-
-                const input = cell.querySelector('.due-date-input');
-                input.addEventListener('change', function() {
-                    const cellId = cell.dataset.id;
-                    const newDueDate = this.value;
-                    const display = cell.querySelector('.due-date-display');
-
-                    // Update the display with the new value
-                    display.textContent = newDueDate;
-
-                    // Send an AJAX request to update the due date in the database
-                    $.ajax({
-                        url: '{{ route('update-due_date') }}', // Use your route name here
-                        method: 'POST',
-                        data: {
-                            id: cellId,
-                            due_date: newDueDate,
-                            project_id: "{{ $project->id }}",
-                            _token: $('meta[name="csrf-token"]').attr(
-                                'content') // CSRF token
-                        },
-                        success: function(response) {
-                            // Optionally handle the response if needed
-                            console.log('Due date updated:', response);
-                        },
-                        error: function(xhr) {
-                            console.error('Error:', xhr.responseText);
-                        }
-                    });
-                });
-            });
 
             // Close input if clicking outside
             document.addEventListener('click', function(event) {
@@ -1401,11 +1500,17 @@
                     });
                 }
             });
-            const times = document.querySelectorAll('.estimated-time-cell');
 
-            times.forEach(cell => {
-                const input = cell.querySelector('.estimated-time-input');
-                const display = cell.querySelector('.estimated-time-display');
+            const dates = document.querySelectorAll('.due-date-cell');
+
+            dates.forEach(cell => {
+                const input = cell.querySelector('.due-date-input');
+                const display = cell.querySelector('.due-date-display');
+
+                // Set min date to today's date
+                const today = new Date().toISOString().split('T')[
+                    0]; // Get today's date in YYYY-MM-DD format
+                input.setAttribute('min', today);
 
                 cell.addEventListener('click', function() {
                     input.style.display = 'block';
@@ -1415,8 +1520,8 @@
 
                 input.addEventListener('blur', function() {
                     const newValue = this.value.trim();
-                    if (newValue && newValue !== display.textContent.replace(' hours', '')) {
-                        updateEstimatedTime(newValue);
+                    if (newValue && newValue !== display.textContent) {
+                        updateDueDate(newValue);
                     } else {
                         // Revert to display if no changes or invalid input
                         input.style.display = 'none';
@@ -1431,11 +1536,101 @@
                     }
                 });
 
-                function updateEstimatedTime(newValue) {
+                function updateDueDate(newValue) {
+                    // Convert date to desired format
+                    const date = new Date(newValue);
+                    const options = {
+                        month: 'short',
+                        day: 'numeric'
+                    };
+                    const formattedDate = date.toLocaleDateString('en-US', options);
+
                     // Update the display
-                    display.textContent = `${newValue} hours`;
+                    display.textContent = formattedDate;
                     input.style.display = 'none';
                     display.style.display = 'block';
+
+                    console.log('Due date :', newValue);
+
+                    // Send AJAX request to update the due date in the database
+                    $.ajax({
+                        url: '{{ route('update-due_date') }}', // Your route to update due date
+                        method: 'POST',
+                        data: {
+                            id: cell.dataset.id,
+                            due_date: newValue,
+                            project_id: "{{ $project->id }}",
+                            _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
+                        },
+                        success: function(response) {
+                            console.log('Due date updated:');
+                        },
+                        error: function(xhr) {
+                            console.error('Error:', xhr.responseText);
+                        }
+                    });
+                }
+
+            });
+
+            // Close input if clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.due-date-cell')) {
+                    document.querySelectorAll('.due-date-input').forEach(input => {
+                        input.style.display = 'none';
+                        const display = input.closest('.due-date-cell').querySelector(
+                            '.due-date-display');
+                        display.style.display = 'block';
+                    });
+                }
+            });
+
+
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.estimated-time-cell')) {
+                    document.querySelectorAll('.estimated-time-input').forEach(input => {
+                        input.style.display = 'none';
+                        const display = input.closest('.estimated-time-cell').querySelector(
+                            '.estimated-time-display');
+                        display.style.display = 'inline-block';
+                    });
+                }
+            });
+
+            const times = document.querySelectorAll('.estimated-time-cell');
+
+            times.forEach(cell => {
+                const input = cell.querySelector('.estimated-time-input');
+                const display = cell.querySelector('.estimated-time-display');
+
+                cell.addEventListener('click', function() {
+                    input.style.display = 'inline-block';
+                    display.style.display = 'none';
+                    input.focus();
+                });
+
+                input.addEventListener('blur', function() {
+                    const newValue = this.value.trim();
+                    if (newValue && newValue !== display.textContent.replace(' hours', '')) {
+                        updateEstimatedTime(newValue);
+                    } else {
+                        input.style.display = 'none';
+                        display.style.display = 'inline-block';
+                    }
+                });
+
+                input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.blur();
+                    }
+                });
+
+                function updateEstimatedTime(newValue) {
+                    // Update the display with the formatted time
+                    display.textContent = `${newValue} hours`;
+                    input.style.display = 'none';
+                    display.style.display = 'inline-block';
 
                     // Send AJAX request to update the estimated time in the database
                     $.ajax({
@@ -1445,10 +1640,12 @@
                             id: cell.dataset.id,
                             estimated_time: newValue,
                             project_id: "{{ $project->id }}",
-                            _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
+                            _token: $('meta[name="csrf-token"]').attr('content')
                         },
                         success: function(response) {
-                            console.log('Estimated time updated:', response);
+                            console.log('Estimated time updated:');
+                            // Update the display with the new formatted time
+                            display.textContent = `${newValue} hours`;
                         },
                         error: function(xhr) {
                             console.error('Error:', xhr.responseText);
@@ -1457,17 +1654,7 @@
                 }
             });
 
-            // Close input if clicking outside
-            document.addEventListener('click', function(event) {
-                if (!event.target.closest('.estimated-time-cell')) {
-                    document.querySelectorAll('.estimated-time-input').forEach(input => {
-                        input.style.display = 'none';
-                        const display = input.closest('.estimated-time-cell').querySelector(
-                            '.estimated-time-display');
-                        display.style.display = 'block';
-                    });
-                }
-            });
+
 
             document.querySelectorAll('.status-cell').forEach(function(cell) {
                 const statusDisplay = cell.querySelector('.status-display');
@@ -1544,6 +1731,69 @@
 
             const tags = document.querySelectorAll('.tag-cell');
 
+            const tagColors = {
+                'admin': {
+                    background: 'rgb(235 182 170)',
+                    text: 'rgb(195 76 76)',
+                    icon: '#914141'
+                }, // Example: Background: Orange, Text: White
+                'account': {
+                    background: 'rgb(154 253 171)',
+                    text: 'rgb(79 118 82)',
+                    icon: 'green'
+                }, // Example: Background: Green, Text: Black
+                'laravel': {
+                    background: 'rgb(207 136 174)',
+                    text: 'rgb(114 13 110)',
+                    icon: 'purple'
+                }, // Example: Background: Pink, Text: White
+                'react': {
+                    background: 'rgb(99 122 174)',
+                    text: 'rgb(46 23 114)',
+                    icon: '#24205a'
+                }, // Example: Background: Blue, Text: White
+                'angular': {
+                    background: 'rgb(63 231 223)',
+                    text: 'rgb(31 58 51)',
+                    icon: '#3b5c59'
+                }, // Example: Background: Red, Text: White
+                'php': {
+                    background: 'rgb(207 136 174)',
+                    text: 'rgb(114 13 110)',
+                    icon: 'purple'
+                },
+                'flutter': {
+                    // Add more tags and colors as needed
+                    background: 'rgb(207 136 174)',
+                    text: 'rgb(114 13 110)',
+                    icon: 'purple'
+                },
+                'ceo': {
+                    // Add more tags and colors as needed
+                    background: 'rgb(207 136 174)',
+                    text: 'rgb(114 13 110)',
+                    icon: 'purple'
+                },
+                'ui/ux': {
+                    // Add more tags and colors as needed
+                    background: 'rgb(213 231 117)',
+                    text: 'rgb(117 118 40)',
+                    icon: '#668000'
+                },
+                'nodejs': {
+                    // Add more tags and colors as needed
+                    background: 'rgb(118 129 249)',
+                    text: 'rgb(135 30 130)',
+                    icon: 'purple'
+                },
+                'ios': {
+                    // Add more tags and colors as needed
+                    background: 'rgb(207 136 174)',
+                    text: 'rgb(114 13 110)',
+                    icon: 'purple'
+                }
+            };
+
             tags.forEach(cell => {
                 const input = cell.querySelector('.tag-input');
                 const display = cell.querySelector('.tag-display');
@@ -1572,11 +1822,47 @@
                                 selectedIndex = -1;
                                 response.tags.forEach((tag, index) => {
                                     const li = document.createElement('li');
-                                    li.textContent = tag.name;
+                                    const span = document.createElement(
+                                        'span');
+                                    const icon = document.createElement(
+                                        'i');
+                                    const merge = document.createElement(
+                                        'div');
+                                    merge.classList.add('merge');
+                                    span.textContent = tag.name;
+                                    icon.classList.add('fa', 'fa-tags');
+                                    icon.appendChild(span);
+                                    merge.appendChild(icon);
+                                    li.appendChild(merge);
+                                    // li.appendChild(span);
+
+                                    // li.textContent = tag.name;
+
+                                    // Set the background color and text color based on the tag name
+                                    if (tagColors[tag.name]) {
+                                        merge.style.backgroundColor =
+                                            tagColors[
+                                                tag.name].background;
+                                        span.style.color = tagColors[tag
+                                                .name]
+                                            .text;
+                                        icon.style.color = tagColors[tag
+                                                .name]
+                                            .icon;
+                                    } else {
+                                        // Default colors if the tag is not in the tagColors map
+                                        merge.style.backgroundColor =
+                                            '#CCCCCC'; // Default Background
+                                        span.style.color =
+                                            '#000000'; // Default Text Color
+                                    }
+
                                     li.dataset.index = index;
-                                    li.addEventListener('click', function() {
-                                        addTagToTask(query, tag.name);
-                                    });
+                                    li.addEventListener('click',
+                                        function() {
+                                            addTagToTask(query, tag
+                                                .name);
+                                        });
                                     suggestions.appendChild(li);
                                 });
                                 suggestions.style.display = 'block';
@@ -1589,6 +1875,8 @@
                         suggestions.style.display = 'none';
                     }
                 });
+
+
 
                 input.addEventListener('keydown', function(e) {
                     const items = suggestions.querySelectorAll('li');
@@ -1608,7 +1896,19 @@
                     } else if (e.key === 'Enter') {
                         e.preventDefault();
                         if (selectedIndex >= 0 && selectedIndex < items.length) {
-                            addTagToTask(getTags(tagContainer), items[selectedIndex].textContent);
+                            addTagToTask(getTags(tagContainer), items[selectedIndex]
+                                .textContent);
+                        } else {
+                            const inputValue = input.value.trim();
+                            if (inputValue.startsWith('.')) {
+                                // Remove the leading dot and add new tag
+                                const newTag = inputValue.substring(1).trim();
+                                if (newTag) {
+                                    addNewTag(newTag).then(() => {
+                                        addTagToTask(getTags(tagContainer), newTag);
+                                    });
+                                }
+                            }
                         }
                     }
                 });
@@ -1630,19 +1930,36 @@
 
                     // Check if the tag is already present
                     if (currentTags.includes(tag)) {
-                        input.value = ''; // Clear the input field
+                        input.value = ' '; // Clear the input field
                         return;
                     }
 
                     // Update the UI to add the new tag
-                    $('<span class="tag-item">' + tag + '</span>').insertBefore(input);
-                    input.value = '';
+                    $('<span class="tag-item">' + tag + '</span>')
+                        .insertBefore(input);
+                    input.value = ' ';
 
                     // Update the tags via AJAX
                     updateTaskTags(cell.dataset.id, getTags(tagContainer));
                 }
 
-                // AJAX request to update tags in the database
+                function addNewTag(tag) {
+                    return $.ajax({
+                        url: '{{ route('add-new-tag') }}', // Your route to add a new tag
+                        type: 'POST',
+                        data: {
+                            tag: tag,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            toastr.success('Tag added successfully.');
+                        },
+                        error: function(xhr) {
+                            toastr.error('Failed to add tag.');
+                        }
+                    });
+                }
+
                 function updateTaskTags(taskId, tags) {
                     $.ajax({
                         url: '{{ route('update-task-tags') }}',
@@ -1655,6 +1972,7 @@
                         },
                         success: function(response) {
                             toastr.success('Tags updated successfully.');
+                            suggestions.style.display = 'none';
                         },
                         error: function(xhr) {
                             toastr.error('Failed to update tags.');
@@ -1662,10 +1980,9 @@
                     });
                 }
 
-                // Utility function to get current tags from the UI
-                function getTags($tagContainer) {
+                function getTags(tagContainer) {
                     const tags = [];
-                    $($tagContainer).find('.tag-item').each(function() {
+                    $(tagContainer).find('.tag-item').each(function() {
                         tags.push($(this).text().trim());
                     });
                     return tags;
@@ -1677,11 +1994,13 @@
                 if (!event.target.closest('.tag-cell')) {
                     document.querySelectorAll('.tag-input').forEach(input => {
                         input.style.display = 'none';
-                        const display = input.closest('.tag-cell').querySelector('.tag-display');
-                        display.style.display = 'block';
+                        const display_data = input.closest('.tag-cell').querySelector(
+                            '.tag-display');
+                        display_data.style.display = 'block';
                     });
                 }
             });
+
 
         });
     </script>
