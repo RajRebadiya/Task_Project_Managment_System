@@ -183,6 +183,27 @@
             margin-top: 30px;
             width: 167%;
         }
+
+        .tag-item {
+
+            padding: 5px 10px;
+            /* Increase padding for better spacing */
+            border-radius: 12px;
+            /* More rounded corners */
+            margin-right: 10px;
+            display: inline-flex;
+            /* Align items better */
+            align-items: center;
+            /* Vertically center the text */
+            font-size: 14px;
+            /* Adjust font size for consistency */
+        }
+
+        .fa-tags {
+
+            margin-right: 5px;
+            /* Space between icon and text */
+        }
     </style>
 @endsection
 @section('content')
@@ -466,7 +487,8 @@
                                                                             // dd($task_user);
                                                                         @endphp
 
-                                                                        <ul class="list-unstyled team-info d-flex">
+                                                                        <ul class="list-unstyled team-info d-flex"
+                                                                            id='up-user'>
                                                                             @foreach ($task_user as $userId)
                                                                                 <li
                                                                                     style="display: inline-block; cursor: pointer;">
@@ -602,24 +624,35 @@
 
                                                                     <td class="tag-cell" style='cursor:pointer;'
                                                                         data-id="{{ $item->id }}" class='col-md-1'>
-                                                                        <i class="fa fa-tags"
-                                                                            id="tag-icon-{{ $item->id }}"></i>
+
                                                                         <div class="tag-container"
                                                                             style="display: inline">
-                                                                            @foreach (explode(',', $item->tag) as $tag)
-                                                                                @php
-                                                                                    $tag = trim($tag); // Trim any extra spaces
-                                                                                    $colors = $tagColors[$tag] ?? [
-                                                                                        'background' => '#f0f0f0',
-                                                                                        'text' => '#000000',
-                                                                                        'icon' => '#000000',
-                                                                                    ];
-                                                                                @endphp
-                                                                                <span class="tag-item"
-                                                                                    style="background-color: {{ $colors['background'] }}; color: {{ $colors['text'] }};">
-                                                                                    {{ $tag }}
-                                                                                </span>
-                                                                            @endforeach
+                                                                            <div class="tag-design col-md-2 d-flex">
+                                                                                @foreach (explode(',', $item->tag) as $tag)
+                                                                                    @php
+                                                                                        $tag = trim($tag); // Trim any extra spaces
+                                                                                        $colors = $tagColors[$tag] ?? [
+                                                                                            'background' =>
+                                                                                                'rgb(235, 182, 170)',
+                                                                                            'text' =>
+                                                                                                'rgb(195, 76, 76)',
+                                                                                            'icon' =>
+                                                                                                'rgb(145, 65, 65)',
+                                                                                        ];
+
+                                                                                    @endphp
+
+                                                                                    <i class="fa fa-tags"
+                                                                                        id="tag-icon-{{ $item->id }}"
+                                                                                        style="color: {{ $colors['icon'] }};"></i>
+                                                                                    <span class="tag-item"
+                                                                                        style="background-color: {{ $colors['background'] }}; color: {{ $colors['text'] }};
+                                                                                   padding: 3px;border-radius:
+                                                                                   5px;margin-right: 12px;">
+                                                                                        {{ $tag }}
+                                                                                    </span>
+                                                                                @endforeach
+                                                                            </div>
                                                                             <input type="text" class="tag-input"
                                                                                 style="display: none;"
                                                                                 placeholder="Add tag">
@@ -1329,65 +1362,40 @@
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
-                            console.log(
-                                response); // Handle the response from the server
+                            console.log(response
+                                .task_user); // Handle the response from the server
+                            const task_user = response.task_user;
+                            console.log('task_user:', task_user);
+
+                            // Construct the new user HTML dynamically
+                            let new_user = '';
+                            task_user.forEach((user) => {
+                                new_user += `
+                                        <li style="display: inline-block; cursor: pointer;">
+                                            <img src="{{ url('assets/images/xs/avatar2.jpg') }}"
+                                                id="user-id-${user.id}"
+                                                style="width: 20px; height: 20px; border-radius: 50%;">
+                                        </li>
+                                    `;
+                            });
+
+                            // Append the plus icon for adding a new user
+                            new_user += `
+    <span type="button" id=""><i class="fa fa-plus user-id-add"></i></span>
+`;
+
+                            // Update the HTML of the container with the newly created user elements
+                            $('#up-user').html(new_user);
+                            // $('#user-id-container-' + taskId).toggle('1000');
+
+
+
                         },
                         error: function(xhr, status, error) {
                             console.log(xhr.responseText); // Handle any errors
                         }
                     });
                 });
-            });
-
-
-            // Handle change event in the select dropdown
-            // $('#dev').on('change', function() {
-
-            //     // Select the element
-            //     const tagCell = document.querySelector('.tag-cell');
-
-            //     // Get the data-id attribute value
-            //     const itemId = tagCell.getAttribute('data-id');
-
-            //     console.log(itemId); // Outputs the value of data-id
-            //     // Get the selected values
-            //     var selectedUsers = $(this).val();
-            //     console.log('Selected users:', selectedUsers);
-
-            //     // Make AJAX request to submit the selected users
-            //     $.ajax({
-            //         url: '{{ route('update-developers') }}', // Your route to update developers
-            //         method: 'POST',
-            //         data: {
-            //             developers: selectedUsers,
-            //             project_id: "{{ $project->id }}", // Ensure you pass the project ID
-            //             _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
-            //         },
-            //         success: function(response) {
-            //             console.log('Developers updated:', response);
-            //             // You can update the UI or show a success message here
-            //         },
-            //         error: function(xhr) {
-            //             console.error('Error:', xhr.responseText);
-            //         }
-            //     });
-            // });
-
-
-
-
-
-
-
-
-
-
-            $('#add-user').on('click', function() {
-                $('#developers').show();
-                $('.multiselect-dropdown').css('width', '80%');
-                $('#add-user').hide(1000);
-                $('#update-user').show(2000);
-
             });
 
             $('#update-user').on('click', function() {
@@ -1840,9 +1848,12 @@
 
                                     // Set the background color and text color based on the tag name
                                     if (tagColors[tag.name]) {
+                                        console.log('inside tag colors');
                                         merge.style.backgroundColor =
                                             tagColors[
                                                 tag.name].background;
+                                        console.log(merge.style
+                                            .backgroundColor);
                                         span.style.color = tagColors[tag
                                                 .name]
                                             .text;
@@ -1852,7 +1863,7 @@
                                     } else {
                                         // Default colors if the tag is not in the tagColors map
                                         merge.style.backgroundColor =
-                                            '#CCCCCC'; // Default Background
+                                            '#ffffff'; // Default Background
                                         span.style.color =
                                             '#000000'; // Default Text Color
                                     }
@@ -1935,7 +1946,14 @@
                     }
 
                     // Update the UI to add the new tag
-                    $('<span class="tag-item">' + tag + '</span>')
+                    // Create the new tag span with the necessary styles
+                    $('<span class="tag-item" style="background-color: ' + tagColors.background +
+                            '; color: ' +
+                            tagColors.text + ';">' +
+                            '<i class="fa fa-tag" style="color: ' + tagColors.icon +
+                            '; margin-right: 5px;"></i>' +
+                            tag +
+                            '</span>')
                         .insertBefore(input);
                     input.value = ' ';
 
@@ -1973,6 +1991,7 @@
                         success: function(response) {
                             toastr.success('Tags updated successfully.');
                             suggestions.style.display = 'none';
+
                         },
                         error: function(xhr) {
                             toastr.error('Failed to update tags.');

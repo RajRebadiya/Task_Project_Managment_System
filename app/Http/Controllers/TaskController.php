@@ -217,7 +217,10 @@ class TaskController extends Controller
             return redirect()->route('projects')->with('error', 'Task not updated');
         }
 
-        return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Member updated successfully');
+        $task_user = $task->users;
+        // dd($task_user);
+
+        return response()->json(['success' => true, 'task_user' => $task_user]);
     }
 
     public function add_new_tag(Request $request)
