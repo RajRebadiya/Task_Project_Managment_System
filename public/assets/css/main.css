@@ -2471,7 +2471,7 @@ html.fullscreen-bg #wrapper {
     padding: 5px 20px;
     position: fixed;
     top: 0px;
-    left: 280px;
+    left: 197px;
     width: calc(100% - 295px);
     z-index: 99;
     background: var(--body-color);
@@ -2751,7 +2751,7 @@ html.fullscreen-bg #wrapper {
     -o-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
     background: var(--card-color);
-    width: 280px;
+    width: 185px;
     height: 100vh;
     box-shadow: inset -2px -2px 8px 0 var(--box-shadow-light);
     position: fixed;
@@ -3632,6 +3632,7 @@ select.form-control:not([size]):not([multiple]) {
 }
 .block-header {
     color: var(--primary-color);
+    padding-left: 2px;
 }
 .block-header h2 {
     font-size: 20px;

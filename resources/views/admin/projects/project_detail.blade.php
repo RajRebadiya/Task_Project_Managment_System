@@ -210,11 +210,11 @@
 
 
     <!-- Main page content body part -->
-    <div id="main-content" style='width: calc(100% - 279px);'>
+    <div id="main-content" style='width: calc(100% - 182px);'>
         <div class="container-fluid">
             <div class="block-header">
                 <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm-12">
+                    <div class="col-lg-6 col-md-6 col-sm-12" style='padding-left: 29px;'>
                         <h2>View Project Detail</h2>
                         <ul class="breadcrumb">
                             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}"><i

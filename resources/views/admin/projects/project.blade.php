@@ -75,7 +75,7 @@
 
 @section('content')
     <!-- mani page content body part -->
-    <div id="main-content" style='width: calc(100% - 279px);'>
+    <div id="main-content" style='width: calc(100% - 182px);'>
         <div class="container-fluid">
             <div class="block-header">
                 <div class="row">
