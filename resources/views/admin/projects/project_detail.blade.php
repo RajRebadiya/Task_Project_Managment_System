@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/toastr/toastr.min.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/vendor/sweetalert/sweetalert.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.css') }}">
+
 
 
 
@@ -146,13 +148,6 @@
             width: 225px;
         }
 
-        .tag-suggestions .merge {
-            padding: 5px 4px;
-            border-radius: 6px;
-            background: #ed3434;
-            color: white;
-            width: 65px;
-        }
 
         .tag-suggestions li {
             padding: 8px 12px;
@@ -183,6 +178,10 @@
             margin-top: 30px;
             width: 167%;
         }
+
+        /* .multiselect-dropdown {
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    display: none !important;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                } */
 
         .tag-item {
 
@@ -488,7 +487,7 @@
                                                                         @endphp
 
                                                                         <ul class="list-unstyled team-info d-flex"
-                                                                            id='up-user'>
+                                                                            id='up-user-{{ $item->id }}'>
                                                                             @foreach ($task_user as $userId)
                                                                                 <li
                                                                                     style="display: inline-block; cursor: pointer;">
@@ -543,7 +542,7 @@
                                                                                 multiple="multiple" class="form-control"
                                                                                 multiselect-search="true"
                                                                                 multiselect-select-all="true"
-                                                                                multiselect-max-items="1" s>
+                                                                                multiselect-max-items="0">
                                                                                 @foreach ($pro_user as $user)
                                                                                     <option value="{{ $user->id }}"
                                                                                         {{ in_array($user->id, $dev_id) ? 'selected' : '' }}>
@@ -624,45 +623,17 @@
 
                                                                     <td class="tag-cell" style='cursor:pointer;'
                                                                         data-id="{{ $item->id }}" class='col-md-1'>
-
                                                                         <div class="tag-container"
                                                                             style="display: inline">
-                                                                            <div class="tag-design col-md-2 d-flex">
-                                                                                @foreach (explode(',', $item->tag) as $tag)
-                                                                                    @php
-                                                                                        $tag = trim($tag); // Trim any extra spaces
-                                                                                        $colors = $tagColors[$tag] ?? [
-                                                                                            'background' =>
-                                                                                                'rgb(235, 182, 170)',
-                                                                                            'text' =>
-                                                                                                'rgb(195, 76, 76)',
-                                                                                            'icon' =>
-                                                                                                'rgb(145, 65, 65)',
-                                                                                        ];
-
-                                                                                    @endphp
-
-                                                                                    <i class="fa fa-tags"
-                                                                                        id="tag-icon-{{ $item->id }}"
-                                                                                        style="color: {{ $colors['icon'] }};"></i>
-                                                                                    <span class="tag-item"
-                                                                                        style="background-color: {{ $colors['background'] }}; color: {{ $colors['text'] }};
-                                                                                   padding: 3px;border-radius:
-                                                                                   5px;margin-right: 12px;">
-                                                                                        {{ $tag }}
-                                                                                    </span>
-                                                                                @endforeach
-                                                                            </div>
                                                                             <input type="text" class="tag-input"
                                                                                 style="display: none;"
-                                                                                placeholder="Add tag">
+                                                                                value="{{ $item->tag }}"
+                                                                                id='tag-data-{{ $item->id }}'
+                                                                                data-role='tagsinput'>
                                                                         </div>
                                                                         <ul class="tag-suggestions"
                                                                             style="display: none;"></ul>
                                                                     </td>
-
-
-
 
 
                                                                     <td class="col-md-1">
@@ -1335,12 +1306,147 @@
     </div>
     <script src='{{ asset('assets/js/jquery-3.7.1.js') }}'></script>
     <script src="{{ asset('assets/js/sweetalert.js') }}"></script>
+    <script src="{{ asset('assets/vendor/bootstrap-tagsinput/bootstrap-tagsinput.js') }}"></script>
+
 
 
     <script>
         $(document).ready(function() {
 
+            const tag_data = $('.tag-input').val();
+            console.log(tag_data);
+
+            $('.tag-container .bootstrap-tagsinput').css('border', 'none');
+            $('.tag-container .bootstrap-tagsinput span').addClass('mt-2');
+            $('.tag-container .bootstrap-tagsinput input').addClass('input-data');
+
+            const suggestions = document.querySelector('.tag-suggestions');
+
+            let selectedIndex = -1;
+
+            $('.input-data').on('keyup', function() {
+                const value = $(this).val();
+
+                $.ajax({
+                    url: '{{ route('get-tags') }}',
+                    method: 'GET',
+                    data: {
+                        project_id: "{{ $project->id }}",
+                        task_id: $(this).closest('tr').data('id'),
+                        tag: value,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        suggestions.innerHTML = '';
+                        response.tags.forEach((tag, index) => {
+                            const li = document.createElement('li');
+                            const span = document.createElement(
+                                'span');
+                            const merge = document.createElement(
+                                'div');
+                            merge.classList.add('merge');
+                            span.textContent = tag.name;
+                            $('.merge span').addClass('tag badge badge-info');
+                            // span.classList.add('tag badge badge-info');
+                            merge.appendChild(span);
+                            li.appendChild(merge);
+
+
+
+                            $('.tag-suggestions').hide();
+
+
+                            suggestions.appendChild(li);
+                        });
+                        suggestions.style.display = 'block';
+                        $('.tag-suggestions').on('mouseleave', function() {
+                            $('.tag-suggestions').hide();
+                        });
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText);
+                    }
+                });
+            });
+
+            const tags = document.querySelectorAll('.tag-cell');
+            console.log(tags);
+
+            tags.forEach(cell => {
+                const input = cell.querySelector('.tag-input');
+                console.log('input', input);
+                const suggestions = cell.querySelector('.tag-suggestions');
+                let selectedIndex = -1;
+
+                input.addEventListener('keydown', function(e) {
+                    const items = suggestions.querySelectorAll('li');
+                    console.log('items', items);
+
+                    if (e.key === 'ArrowDown') {
+                        console.log('ArrowDown');
+                        e.preventDefault();
+                        if (selectedIndex < items.length - 1) {
+                            selectedIndex++;
+                            updateSelection(items);
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        console.log('ArrowUp');
+                        e.preventDefault();
+                        if (selectedIndex > 0) {
+                            selectedIndex--;
+                            updateSelection(items);
+                        }
+                    } else if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (selectedIndex >= 0 && selectedIndex < items.length) {
+                            input.value = items[selectedIndex].textContent.trim();
+                            suggestions.style.display = 'none';
+                        }
+                    }
+                });
+
+                function updateSelection(items) {
+                    items.forEach(item => item.classList.remove('selected'));
+                    if (selectedIndex >= 0 && selectedIndex < items.length) {
+                        items[selectedIndex].classList.add('selected');
+                        items[selectedIndex].scrollIntoView({
+                            block: 'nearest'
+                        });
+                    }
+                }
+            });
+
+
+            $('.tag-cell').on('mouseleave', function() {
+
+                const tag_data = $('#tag-data-' + $(this).data('id')).val();
+                $.ajax({
+                    url: '{{ route('update-tag') }}',
+                    method: 'POST',
+                    data: {
+                        task_id: $(this).data('id'),
+                        tag: tag_data,
+                        project_id: "{{ $project->id }}",
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        console.log(response);
+
+
+                    }
+                });
+            });
+
+
+
+
+
+
+
+
             $('.user-id-add').on('click', function() {
+                console.log('clicked');
+                $('.multiselect-dropdown').css('display', 'block');
                 var taskId = $(this).closest('tr').data('id');
                 console.log('task_id: ' + taskId);
                 $('#user-id-container-' + taskId).toggle('1000');
@@ -1381,12 +1487,17 @@
 
                             // Append the plus icon for adding a new user
                             new_user += `
-    <span type="button" id=""><i class="fa fa-plus user-id-add"></i></span>
-`;
+                        <span type="button" id=""><i class="fa fa-plus user-id-add"></i></span>
+                    `;
 
                             // Update the HTML of the container with the newly created user elements
-                            $('#up-user').html(new_user);
+                            $('#up-user-' + taskId).html(new_user);
                             // $('#user-id-container-' + taskId).toggle('1000');
+                            $('.multiselect-dropdown').on('mouseleave', function() {
+                                $('.multiselect-dropdown').css('display',
+                                    'none');
+                                toastr.success('Assignee Updated successfully');
+                            });
 
 
 
@@ -1481,6 +1592,7 @@
                             success: function(response) {
                                 // Optionally handle the response if needed
                                 console.log('Priority updated:', response);
+                                toastr.success('Priority Updated successfully');
                             },
                             error: function(xhr) {
                                 console.error('Error:', xhr.responseText);
@@ -1572,6 +1684,7 @@
                         },
                         success: function(response) {
                             console.log('Due date updated:');
+                            toastr.success('Due Date Updated successfully');
                         },
                         error: function(xhr) {
                             console.error('Error:', xhr.responseText);
@@ -1654,6 +1767,8 @@
                             console.log('Estimated time updated:');
                             // Update the display with the new formatted time
                             display.textContent = `${newValue} hours`;
+
+                            toastr.success('Estimated Time Updated successfully');
                         },
                         error: function(xhr) {
                             console.error('Error:', xhr.responseText);
@@ -1737,292 +1852,307 @@
                 });
             });
 
-            const tags = document.querySelectorAll('.tag-cell');
+            // const tagss = document.querySelectorAll('.tag-cell');
+            // console.log(tags);
 
-            const tagColors = {
-                'admin': {
-                    background: 'rgb(235 182 170)',
-                    text: 'rgb(195 76 76)',
-                    icon: '#914141'
-                }, // Example: Background: Orange, Text: White
-                'account': {
-                    background: 'rgb(154 253 171)',
-                    text: 'rgb(79 118 82)',
-                    icon: 'green'
-                }, // Example: Background: Green, Text: Black
-                'laravel': {
-                    background: 'rgb(207 136 174)',
-                    text: 'rgb(114 13 110)',
-                    icon: 'purple'
-                }, // Example: Background: Pink, Text: White
-                'react': {
-                    background: 'rgb(99 122 174)',
-                    text: 'rgb(46 23 114)',
-                    icon: '#24205a'
-                }, // Example: Background: Blue, Text: White
-                'angular': {
-                    background: 'rgb(63 231 223)',
-                    text: 'rgb(31 58 51)',
-                    icon: '#3b5c59'
-                }, // Example: Background: Red, Text: White
-                'php': {
-                    background: 'rgb(207 136 174)',
-                    text: 'rgb(114 13 110)',
-                    icon: 'purple'
-                },
-                'flutter': {
-                    // Add more tags and colors as needed
-                    background: 'rgb(207 136 174)',
-                    text: 'rgb(114 13 110)',
-                    icon: 'purple'
-                },
-                'ceo': {
-                    // Add more tags and colors as needed
-                    background: 'rgb(207 136 174)',
-                    text: 'rgb(114 13 110)',
-                    icon: 'purple'
-                },
-                'ui/ux': {
-                    // Add more tags and colors as needed
-                    background: 'rgb(213 231 117)',
-                    text: 'rgb(117 118 40)',
-                    icon: '#668000'
-                },
-                'nodejs': {
-                    // Add more tags and colors as needed
-                    background: 'rgb(118 129 249)',
-                    text: 'rgb(135 30 130)',
-                    icon: 'purple'
-                },
-                'ios': {
-                    // Add more tags and colors as needed
-                    background: 'rgb(207 136 174)',
-                    text: 'rgb(114 13 110)',
-                    icon: 'purple'
-                }
-            };
+            // const tagColors = {
+            //     'admin': {
+            //         background: 'rgb(235 182 170)',
+            //         text: 'rgb(195 76 76)',
+            //         icon: '#914141'
+            //     }, // Example: Background: Orange, Text: White
+            //     'account': {
+            //         background: 'rgb(154 253 171)',
+            //         text: 'rgb(79 118 82)',
+            //         icon: 'green'
+            //     }, // Example: Background: Green, Text: Black
+            //     'laravel': {
+            //         background: 'rgb(207 136 174)',
+            //         text: 'rgb(114 13 110)',
+            //         icon: 'purple'
+            //     }, // Example: Background: Pink, Text: White
+            //     'react': {
+            //         background: 'rgb(99 122 174)',
+            //         text: 'rgb(46 23 114)',
+            //         icon: '#24205a'
+            //     }, // Example: Background: Blue, Text: White
+            //     'angular': {
+            //         background: 'rgb(63 231 223)',
+            //         text: 'rgb(31 58 51)',
+            //         icon: '#3b5c59'
+            //     }, // Example: Background: Red, Text: White
+            //     'php': {
+            //         background: 'rgb(207 136 174)',
+            //         text: 'rgb(114 13 110)',
+            //         icon: 'purple'
+            //     },
+            //     'flutter': {
+            //         // Add more tags and colors as needed
+            //         background: 'rgb(207 136 174)',
+            //         text: 'rgb(114 13 110)',
+            //         icon: 'purple'
+            //     },
+            //     'ceo': {
+            //         // Add more tags and colors as needed
+            //         background: 'rgb(207 136 174)',
+            //         text: 'rgb(114 13 110)',
+            //         icon: 'purple'
+            //     },
+            //     'ui/ux': {
+            //         // Add more tags and colors as needed
+            //         background: 'rgb(213 231 117)',
+            //         text: 'rgb(117 118 40)',
+            //         icon: '#668000'
+            //     },
+            //     'nodejs': {
+            //         // Add more tags and colors as needed
+            //         background: 'rgb(118 129 249)',
+            //         text: 'rgb(135 30 130)',
+            //         icon: 'purple'
+            //     },
+            //     'ios': {
+            //         // Add more tags and colors as needed
+            //         background: 'rgb(207 136 174)',
+            //         text: 'rgb(114 13 110)',
+            //         icon: 'purple'
+            //     }
+            // };
 
-            tags.forEach(cell => {
-                const input = cell.querySelector('.tag-input');
-                const display = cell.querySelector('.tag-display');
-                const suggestions = cell.querySelector('.tag-suggestions');
-                const tagContainer = cell.querySelector('.tag-container');
-                let selectedIndex = -1;
+            // tagss.forEach(cell => {
+            //     const input = cell.querySelector('.tag-input');
+            //     const display = cell.querySelector('.tag-display');
+            //     const suggestions = cell.querySelector('.tag-suggestions');
+            //     const tagContainer = cell.querySelector('.tag-container');
+            //     let selectedIndex = -1;
+            //     // console.log('input', input);
 
-                cell.addEventListener('click', function() {
-                    input.style.display = 'block';
-                    display.style.display = 'none';
-                    input.focus();
-                });
+            //     cell.addEventListener('click', function() {
+            //         // Ensure the input and display elements exist
+            //         if (input && display) {
+            //             input.style.display = 'block';
+            //             display.style.display = 'none';
+            //             input.focus();
+            //         }
+            //     });
 
-                input.addEventListener('input', function() {
-                    const query = this.value.trim();
+            //     input.addEventListener('input', function() {
+            //         const query = this.value.trim();
 
-                    if (query.length > 0) {
-                        $.ajax({
-                            url: '{{ route('get-tags') }}', // Your route to get tag suggestions
-                            method: 'GET',
-                            data: {
-                                query: query
-                            },
-                            success: function(response) {
-                                suggestions.innerHTML = '';
-                                selectedIndex = -1;
-                                response.tags.forEach((tag, index) => {
-                                    const li = document.createElement('li');
-                                    const span = document.createElement(
-                                        'span');
-                                    const icon = document.createElement(
-                                        'i');
-                                    const merge = document.createElement(
-                                        'div');
-                                    merge.classList.add('merge');
-                                    span.textContent = tag.name;
-                                    icon.classList.add('fa', 'fa-tags');
-                                    icon.appendChild(span);
-                                    merge.appendChild(icon);
-                                    li.appendChild(merge);
-                                    // li.appendChild(span);
+            //         if (query.length > 0) {
+            //             $.ajax({
+            //                 url: '{{ route('get-tags') }}', // Your route to get tag suggestions
+            //                 method: 'GET',
+            //                 data: {
+            //                     query: query
+            //                 },
+            //                 success: function(response) {
+            //                     suggestions.innerHTML = '';
+            //                     selectedIndex = -1;
+            //                     response.tags.forEach((tag, index) => {
+            //                         const li = document.createElement('li');
+            //                         const span = document.createElement(
+            //                             'span');
+            //                         const icon = document.createElement(
+            //                             'i');
+            //                         const merge = document.createElement(
+            //                             'div');
+            //                         merge.classList.add('merge');
+            //                         span.textContent = tag.name;
+            //                         icon.classList.add('fa', 'fa-tags');
+            //                         icon.appendChild(span);
+            //                         merge.appendChild(icon);
+            //                         li.appendChild(merge);
+            //                         // li.appendChild(span);
 
-                                    // li.textContent = tag.name;
+            //                         // li.textContent = tag.name;
 
-                                    // Set the background color and text color based on the tag name
-                                    if (tagColors[tag.name]) {
-                                        console.log('inside tag colors');
-                                        merge.style.backgroundColor =
-                                            tagColors[
-                                                tag.name].background;
-                                        console.log(merge.style
-                                            .backgroundColor);
-                                        span.style.color = tagColors[tag
-                                                .name]
-                                            .text;
-                                        icon.style.color = tagColors[tag
-                                                .name]
-                                            .icon;
-                                    } else {
-                                        // Default colors if the tag is not in the tagColors map
-                                        merge.style.backgroundColor =
-                                            '#ffffff'; // Default Background
-                                        span.style.color =
-                                            '#000000'; // Default Text Color
-                                    }
+            //                         // Set the background color and text color based on the tag name
+            //                         if (tagColors[tag.name]) {
+            //                             console.log('inside tag colors');
+            //                             merge.style.backgroundColor =
+            //                                 tagColors[
+            //                                     tag.name].background;
+            //                             console.log(merge.style
+            //                                 .backgroundColor);
+            //                             span.style.color = tagColors[tag
+            //                                     .name]
+            //                                 .text;
+            //                             icon.style.color = tagColors[tag
+            //                                     .name]
+            //                                 .icon;
+            //                         } else {
+            //                             // Default colors if the tag is not in the tagColors map
+            //                             merge.style.backgroundColor =
+            //                                 '#ffffff'; // Default Background
+            //                             span.style.color =
+            //                                 '#000000'; // Default Text Color
+            //                         }
 
-                                    li.dataset.index = index;
-                                    li.addEventListener('click',
-                                        function() {
-                                            addTagToTask(query, tag
-                                                .name);
-                                        });
-                                    suggestions.appendChild(li);
-                                });
-                                suggestions.style.display = 'block';
-                            },
-                            error: function(xhr) {
-                                console.error('Error:', xhr.responseText);
-                            }
-                        });
-                    } else {
-                        suggestions.style.display = 'none';
-                    }
-                });
+            //                         li.dataset.index = index;
+            //                         li.addEventListener('click',
+            //                             function() {
+            //                                 addTagToTask(query, tag
+            //                                     .name);
+            //                             });
+            //                         suggestions.appendChild(li);
+            //                     });
+            //                     suggestions.style.display = 'block';
+            //                 },
+            //                 error: function(xhr) {
+            //                     console.error('Error:', xhr.responseText);
+            //                 }
+            //             });
+            //         } else {
+            //             suggestions.style.display = 'none';
+            //         }
+            //     });
 
 
 
-                input.addEventListener('keydown', function(e) {
-                    const items = suggestions.querySelectorAll('li');
+            //     // input.addEventListener('keydown', function(e) {
+            //     //     const items = suggestions.querySelectorAll('li');
 
-                    if (e.key === 'ArrowDown') {
-                        e.preventDefault();
-                        if (selectedIndex < items.length - 1) {
-                            selectedIndex++;
-                            updateSelection();
-                        }
-                    } else if (e.key === 'ArrowUp') {
-                        e.preventDefault();
-                        if (selectedIndex > 0) {
-                            selectedIndex--;
-                            updateSelection();
-                        }
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (selectedIndex >= 0 && selectedIndex < items.length) {
-                            addTagToTask(getTags(tagContainer), items[selectedIndex]
-                                .textContent);
-                        } else {
-                            const inputValue = input.value.trim();
-                            if (inputValue.startsWith('.')) {
-                                // Remove the leading dot and add new tag
-                                const newTag = inputValue.substring(1).trim();
-                                if (newTag) {
-                                    addNewTag(newTag).then(() => {
-                                        addTagToTask(getTags(tagContainer), newTag);
-                                    });
-                                }
-                            }
-                        }
-                    }
-                });
+            //     //     if (e.key === 'ArrowDown') {
+            //     //         e.preventDefault();
+            //     //         if (selectedIndex < items.length - 1) {
+            //     //             selectedIndex++;
+            //     //             updateSelection();
+            //     //         }
+            //     //     } else if (e.key === 'ArrowUp') {
+            //     //         e.preventDefault();
+            //     //         if (selectedIndex > 0) {
+            //     //             selectedIndex--;
+            //     //             updateSelection();
+            //     //         }
+            //     //     } else if (e.key === 'Enter') {
+            //     //         e.preventDefault();
+            //     //         if (selectedIndex >= 0 && selectedIndex < items.length) {
+            //     //             addTagToTask(getTags(tagContainer), items[selectedIndex]
+            //     //                 .textContent);
+            //     //         } else {
+            //     //             const inputValue = input.value.trim();
+            //     //             if (inputValue.startsWith('.')) {
+            //     //                 // Remove the leading dot and add new tag
+            //     //                 const newTag = inputValue.substring(1).trim();
+            //     //                 if (newTag) {
+            //     //                     addNewTag(newTag).then(() => {
+            //     //                         addTagToTask(getTags(tagContainer), newTag);
+            //     //                     });
+            //     //                 }
+            //     //             }
+            //     //         }
+            //     //     }
+            //     // });
 
-                function updateSelection() {
-                    const items = suggestions.querySelectorAll('li');
-                    items.forEach(item => item.classList.remove('selected'));
-                    if (selectedIndex >= 0 && selectedIndex < items.length) {
-                        items[selectedIndex].classList.add('selected');
-                        items[selectedIndex].scrollIntoView({
-                            block: 'nearest'
-                        });
-                    }
-                }
+            //     // function updateSelection() {
+            //     //     const items = suggestions.querySelectorAll('li');
+            //     //     items.forEach(item => item.classList.remove('selected'));
+            //     //     if (selectedIndex >= 0 && selectedIndex < items.length) {
+            //     //         items[selectedIndex].classList.add('selected');
+            //     //         items[selectedIndex].scrollIntoView({
+            //     //             block: 'nearest'
+            //     //         });
+            //     //     }
+            //     // }
 
-                function addTagToTask(currentTags, newTag = null) {
-                    const tag = newTag || input.value.trim();
-                    if (!tag) return;
+            //     function addTagToTask(currentTags, newTag = null) {
+            //         const tag = newTag || input.value.trim();
+            //         if (!tag) return;
 
-                    // Check if the tag is already present
-                    if (currentTags.includes(tag)) {
-                        input.value = ' '; // Clear the input field
-                        return;
-                    }
+            //         // Check if the tag is already present
+            //         if (currentTags.includes(tag)) {
+            //             input.value = ' '; // Clear the input field
+            //             return;
+            //         }
 
-                    // Update the UI to add the new tag
-                    // Create the new tag span with the necessary styles
-                    $('<span class="tag-item" style="background-color: ' + tagColors.background +
-                            '; color: ' +
-                            tagColors.text + ';">' +
-                            '<i class="fa fa-tag" style="color: ' + tagColors.icon +
-                            '; margin-right: 5px;"></i>' +
-                            tag +
-                            '</span>')
-                        .insertBefore(input);
-                    input.value = ' ';
+            //         // Update the UI to add the new tag
+            //         // Create the new tag span with the necessary styles
+            //         toastr.success('Tag added successfully.');
+            //         input.value = ' ';
 
-                    // Update the tags via AJAX
-                    updateTaskTags(cell.dataset.id, getTags(tagContainer));
-                }
+            //         // Update the tags via AJAX
+            //         updateTaskTags(cell.dataset.id, getTags(tagContainer));
+            //     }
 
-                function addNewTag(tag) {
-                    return $.ajax({
-                        url: '{{ route('add-new-tag') }}', // Your route to add a new tag
-                        type: 'POST',
-                        data: {
-                            tag: tag,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            toastr.success('Tag added successfully.');
-                        },
-                        error: function(xhr) {
-                            toastr.error('Failed to add tag.');
-                        }
-                    });
-                }
+            //     function addNewTag(tag) {
+            //         return $.ajax({
+            //             url: '{{ route('add-new-tag') }}', // Your route to add a new tag
+            //             type: 'POST',
+            //             data: {
+            //                 tag: tag,
+            //                 _token: '{{ csrf_token() }}'
+            //             },
+            //             success: function(response) {
+            //                 toastr.success('Tag added successfully.');
+            //             },
+            //             error: function(xhr) {
+            //                 toastr.error('Failed to add tag.');
+            //             }
+            //         });
+            //     }
 
-                function updateTaskTags(taskId, tags) {
-                    $.ajax({
-                        url: '{{ route('update-task-tags') }}',
-                        type: 'POST',
-                        data: {
-                            id: taskId,
-                            tags: tags.join(','),
-                            project_id: '{{ $project->id }}',
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            toastr.success('Tags updated successfully.');
-                            suggestions.style.display = 'none';
+            //     function updateTaskTags(taskId, tags) {
+            //         $.ajax({
+            //             url: '{{ route('update-task-tags') }}',
+            //             type: 'POST',
+            //             data: {
+            //                 id: taskId,
+            //                 tags: tags.join(','),
+            //                 project_id: '{{ $project->id }}',
+            //                 _token: '{{ csrf_token() }}'
+            //             },
+            //             success: function(response) {
+            //                 toastr.success('Tags updated successfully.');
+            //                 suggestions.style.display = 'none';
 
-                        },
-                        error: function(xhr) {
-                            toastr.error('Failed to update tags.');
-                        }
-                    });
-                }
+            //             },
+            //             error: function(xhr) {
+            //                 toastr.error('Failed to update tags.');
+            //             }
+            //         });
+            //     }
 
-                function getTags(tagContainer) {
-                    const tags = [];
-                    $(tagContainer).find('.tag-item').each(function() {
-                        tags.push($(this).text().trim());
-                    });
-                    return tags;
-                }
-            });
+            //     function getTags(tagContainer) {
+            //         const tags = [];
+            //         $(tagContainer).find('.tag-item').each(function() {
+            //             tags.push($(this).text().trim());
+            //         });
+            //         return tags;
+            //     }
+            // });
 
-            // Close input if clicking outside
-            document.addEventListener('click', function(event) {
-                if (!event.target.closest('.tag-cell')) {
-                    document.querySelectorAll('.tag-input').forEach(input => {
-                        input.style.display = 'none';
-                        const display_data = input.closest('.tag-cell').querySelector(
-                            '.tag-display');
-                        display_data.style.display = 'block';
-                    });
-                }
-            });
+            // document.addEventListener('click', function(event) {
+            //     // Check if the click is outside of any '.tag-cell' elements
+            //     if (!event.target.closest('.tag-cell')) {
+            //         document.querySelectorAll('.tag-input').forEach(input => {
+            //             // Check if the input element exists before trying to modify its style
+            //             if (input) {
+            //                 input.style.display = 'none';
+            //                 const display_data = input.closest('.tag-cell').querySelector(
+            //                     '.tag-display');
+
+            //                 // Check if the display_data element exists before trying to modify its style
+            //                 if (display_data) {
+            //                     display_data.style.display = 'block';
+            //                 }
+            //             }
+            //         });
+            //     }
+            // });
+
+
+
+
+
+
+
+
 
 
         });
     </script>
+
+
 
 
 

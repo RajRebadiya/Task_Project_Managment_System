@@ -192,8 +192,9 @@
 
 
     <script src="{{ asset('assets/js/multiselect-dropdown.js') }}"></script>
-
     @yield('script')
+
+
 
 
 

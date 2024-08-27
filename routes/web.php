@@ -73,4 +73,5 @@ Route::controller(TaskController::class)->middleware('redirectIfAuthenticated')-
     Route::get('task-delete/{id}', 'delete_task')->name('task-delete');
 
     Route::post('update-task-tags', 'update_task_tags')->name('update-task-tags');
+    Route::post('update-tag', 'update_tag')->name('update-tag');
 });

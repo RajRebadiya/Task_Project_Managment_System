@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Task;
 use App\Models\Tag;
+use Illuminate\Support\Facades\DB;
 
 class TaskController extends Controller
 {
@@ -94,7 +95,8 @@ class TaskController extends Controller
 
     public function get_tags(Request $request)
     {
-        $query = $request->input('query');
+        // dd($request->all());
+        $query = $request->input('tag');
         $tags = Tag::where('name', 'like', "%$query%")->get();
 
         return response()->json(['tags' => $tags]);
@@ -173,25 +175,7 @@ class TaskController extends Controller
         return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Task deleted successfully');
     }
 
-    public function update_task_tags(Request $request)
-    {
-        // dd($request->all());
-        $request->validate([
-            'id' => 'required',
-            'tags' => 'required',
-            'project_id' => 'required',
-        ]);
 
-        $task = Task::find($request->id);
-        $task->tag = $request->tags;
-        $task->save();
-
-        if (!$task) {
-            return redirect()->route('projects')->with('error', 'Task not updated');
-        }
-
-        return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Task updated successfully');
-    }
 
     public function update_developers(Request $request)
     {
@@ -236,5 +220,60 @@ class TaskController extends Controller
         }
 
         return redirect()->back()->with('success', 'Tag added successfully');
+    }
+
+    public function update_tag(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'task_id' => 'required',
+            'tag' => 'required',
+            'project_id' => 'required',
+        ]);
+
+        // Retrieve all existing tag names from the tags table
+        $existingTags = DB::table('tags')->pluck('name')->toArray();
+
+        $newTags = explode(',', $request->tag);
+        $existingTagsLower = array_map('strtolower', $existingTags);
+        $newTagsLower = array_map('strtolower', $newTags);
+        $uniqueTagsLower = array_diff($newTagsLower, $existingTagsLower);
+        $uniqueTags = array_intersect_key($newTags, $uniqueTagsLower);
+
+        foreach ($uniqueTags as $tag) {
+            DB::table('tags')->insert(['name' => $tag, 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+
+        $task = Task::find($request->task_id);
+        $data = $task->tag;
+        $task->tag = $request->tag;
+        $task->save();
+
+        if (!$task) {
+            return redirect()->route('projects')->with('error', 'Task not updated');
+        }
+
+        return response()->json(['success' => true, 'task' => $task]);
+    }
+
+    public function update_task_tags(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'id' => 'required',
+            'tags' => 'required',
+            'project_id' => 'required',
+        ]);
+
+        $task = Task::find($request->id);
+        $task->tag = $request->tags;
+        $task->save();
+
+        if (!$task) {
+            return redirect()->route('projects')->with('error', 'Task not updated');
+        }
+
+        return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Task updated successfully');
     }
 }
