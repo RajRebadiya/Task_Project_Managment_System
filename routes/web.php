@@ -74,4 +74,5 @@ Route::controller(TaskController::class)->middleware('redirectIfAuthenticated')-
 
     Route::post('update-task-tags', 'update_task_tags')->name('update-task-tags');
     Route::post('update-tag', 'update_tag')->name('update-tag');
+    Route::post('tag-store', 'tag_store')->name('tag-store');
 });

@@ -98,6 +98,7 @@ class TaskController extends Controller
         // dd($request->all());
         $query = $request->input('tag');
         $tags = Tag::where('name', 'like', "%$query%")->get();
+        // dd($tags);
 
         return response()->json(['tags' => $tags]);
     }
@@ -254,7 +255,7 @@ class TaskController extends Controller
             return redirect()->route('projects')->with('error', 'Task not updated');
         }
 
-        return response()->json(['success' => true, 'task' => $task]);
+        return response()->json(['success' => true, 'data' => $data]);
     }
 
     public function update_task_tags(Request $request)
@@ -275,5 +276,39 @@ class TaskController extends Controller
         }
 
         return redirect()->route('project_detail', ['id' => $task->project_id])->with('success', 'Task updated successfully');
+    }
+
+    public function tag_store(Request $request)
+    {
+        // dd($request->all());
+        $request->validate([
+            'tag' => 'required',
+            'project_id' => 'required',
+            'task_id' => 'required',
+        ]);
+        // Get the comma-separated tag string
+        $newTag = $request->tag;
+
+
+        $tagsArray = explode(',', $newTag);
+        $filteredTags = array_filter($tagsArray, function ($tag) {
+            return strlen(trim($tag)) >= 3; // trim to remove spaces and check length
+        });
+        $validatedTags = implode(',', $filteredTags);
+        // dd($validatedTags);
+        $task = Task::find($request->task_id);
+        $task->tag = $validatedTags;
+        $task->save();
+        // dd($NewData);
+
+
+        // dd($task->tag);
+
+        if (!$task) {
+            return redirect()->route('projects')->with('error', 'Task not updated');
+        } else {
+            // dd($task->tag);
+            return response()->json(['success' => true, 'validatedTags' => $validatedTags]);
+        }
     }
 }

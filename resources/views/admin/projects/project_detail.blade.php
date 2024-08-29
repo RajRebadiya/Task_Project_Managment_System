@@ -180,8 +180,8 @@
         }
 
         /* .multiselect-dropdown {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    display: none !important;
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                } */
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            display: none !important;
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        } */
 
         .tag-item {
 
@@ -452,7 +452,8 @@
                                                     <tbody>
                                                         @foreach ($data as $item)
                                                             @if ($item->status == 'todo')
-                                                                <tr class='col-md-12' data-id="{{ $item->id }}">
+                                                                <tr class='col-md-12 ' id='task'
+                                                                    data-id="{{ $item->id }}">
                                                                     <td class='col-md-2' contenteditable="false">
                                                                         {{ $item->title }}</td>
                                                                     <td class="status-cell  col-md-1"
@@ -624,11 +625,13 @@
                                                                     <td class="tag-cell" style='cursor:pointer;'
                                                                         data-id="{{ $item->id }}" class='col-md-1'>
                                                                         <div class="tag-container"
+                                                                            id="tag-container-{{ $item->id }}"
                                                                             style="display: inline">
                                                                             <input type="text" class="tag-input"
                                                                                 style="display: none;"
                                                                                 value="{{ $item->tag }}"
                                                                                 id='tag-data-{{ $item->id }}'
+                                                                                data-id='{{ $item->id }}'
                                                                                 data-role='tagsinput'>
                                                                         </div>
                                                                         <ul class="tag-suggestions"
@@ -1310,11 +1313,13 @@
 
 
 
+
     <script>
         $(document).ready(function() {
 
             const tag_data = $('.tag-input').val();
-            console.log(tag_data);
+            const TaskId = $('#task').data('id');
+            console.log('TaskId', TaskId);
 
             $('.tag-container .bootstrap-tagsinput').css('border', 'none');
             $('.tag-container .bootstrap-tagsinput span').addClass('mt-2');
@@ -1327,6 +1332,12 @@
             $('.input-data').on('keyup', function() {
                 const value = $(this).val();
 
+                const oldTag = $('.tag-input').val();
+                const taskId = $('.tag-cell').data('id');
+                console.log('taskId', taskId);
+
+
+
                 $.ajax({
                     url: '{{ route('get-tags') }}',
                     method: 'GET',
@@ -1337,28 +1348,78 @@
                         _token: '{{ csrf_token() }}'
                     },
                     success: function(response) {
+
                         suggestions.innerHTML = '';
+
                         response.tags.forEach((tag, index) => {
                             const li = document.createElement('li');
-                            const span = document.createElement(
-                                'span');
-                            const merge = document.createElement(
-                                'div');
+                            const span = document.createElement('span');
+                            const merge = document.createElement('div');
+
                             merge.classList.add('merge');
                             span.textContent = tag.name;
                             $('.merge span').addClass('tag badge badge-info');
+                            li.classList.add('tag-list');
                             // span.classList.add('tag badge badge-info');
                             merge.appendChild(span);
                             li.appendChild(merge);
-
-
-
                             $('.tag-suggestions').hide();
 
 
                             suggestions.appendChild(li);
                         });
+
                         suggestions.style.display = 'block';
+
+
+
+                        // Event listener for clicking on a tag suggestion
+                        $('.tag-list').on('click', function() {
+                            // Get the value of the clicked tag
+                            const name = $(this).find('.tag').text();
+                            console.log('name', name);
+                            const oldTag = $('.tag-input').val();
+                            var newTag = oldTag + ',' + name;
+                            $('.tag-input').val(newTag);
+                            // const final = ;
+                            console.log('final', newTag);
+
+
+                            // Append the selected tag to the tag container
+                            $('.tag-container .bootstrap-tagsinput').append(
+                                '<span class="tag mt-2 badge badge-info">' + name +
+                                '<span data-role="remove" class="mt-2"></span>' +
+                                '</span>'
+                            );
+                            // // Hide the suggestions
+                            // $('.tag-suggestions').hide();
+
+                            // // Clear the input
+                            // // $('.tag-input').val();
+
+                            // Send the selected tag to the server
+                            $.ajax({
+                                url: '{{ route('tag-store') }}',
+                                method: 'POST',
+                                data: {
+                                    project_id: "{{ $project->id }}",
+                                    task_id: $(this).closest('tr').data('id'),
+                                    tag: newTag,
+                                    _token: '{{ csrf_token() }}'
+                                },
+                                success: function(response) {
+
+                                    const newtag = response.validatedTags;
+                                    $('.tag-input').val(newtag);
+                                },
+                                error: function(xhr) {
+                                    console.error('Error:', xhr
+                                        .responseText);
+                                }
+                            });
+                        });
+
+                        // Hide suggestions when the mouse leaves the suggestions list
                         $('.tag-suggestions').on('mouseleave', function() {
                             $('.tag-suggestions').hide();
                         });
@@ -1369,57 +1430,61 @@
                 });
             });
 
-            const tags = document.querySelectorAll('.tag-cell');
-            console.log(tags);
 
-            tags.forEach(cell => {
-                const input = cell.querySelector('.tag-input');
-                console.log('input', input);
-                const suggestions = cell.querySelector('.tag-suggestions');
-                let selectedIndex = -1;
 
-                input.addEventListener('keydown', function(e) {
-                    const items = suggestions.querySelectorAll('li');
-                    console.log('items', items);
 
-                    if (e.key === 'ArrowDown') {
-                        console.log('ArrowDown');
-                        e.preventDefault();
-                        if (selectedIndex < items.length - 1) {
-                            selectedIndex++;
-                            updateSelection(items);
-                        }
-                    } else if (e.key === 'ArrowUp') {
-                        console.log('ArrowUp');
-                        e.preventDefault();
-                        if (selectedIndex > 0) {
-                            selectedIndex--;
-                            updateSelection(items);
-                        }
-                    } else if (e.key === 'Enter') {
-                        e.preventDefault();
-                        if (selectedIndex >= 0 && selectedIndex < items.length) {
-                            input.value = items[selectedIndex].textContent.trim();
-                            suggestions.style.display = 'none';
-                        }
-                    }
-                });
+            // const tags = document.querySelectorAll('.tag-cell');
+            // console.log(tags);
 
-                function updateSelection(items) {
-                    items.forEach(item => item.classList.remove('selected'));
-                    if (selectedIndex >= 0 && selectedIndex < items.length) {
-                        items[selectedIndex].classList.add('selected');
-                        items[selectedIndex].scrollIntoView({
-                            block: 'nearest'
-                        });
-                    }
-                }
-            });
+            // tags.forEach(cell => {
+            //     const input = cell.querySelector('.tag-input');
+            //     console.log('input', input);
+            //     const suggestions = cell.querySelector('.tag-suggestions');
+            //     let selectedIndex = -1;
+
+            //     input.addEventListener('keydown', function(e) {
+            //         const items = suggestions.querySelectorAll('li');
+            //         console.log('items', items);
+
+            //         if (e.key === 'ArrowDown') {
+            //             console.log('ArrowDown');
+            //             e.preventDefault();
+            //             if (selectedIndex < items.length - 1) {
+            //                 selectedIndex++;
+            //                 updateSelection(items);
+            //             }
+            //         } else if (e.key === 'ArrowUp') {
+            //             console.log('ArrowUp');
+            //             e.preventDefault();
+            //             if (selectedIndex > 0) {
+            //                 selectedIndex--;
+            //                 updateSelection(items);
+            //             }
+            //         } else if (e.key === 'Enter') {
+            //             e.preventDefault();
+            //             if (selectedIndex >= 0 && selectedIndex < items.length) {
+            //                 input.value = items[selectedIndex].textContent.trim();
+            //                 suggestions.style.display = 'none';
+            //             }
+            //         }
+            //     });
+
+            //     function updateSelection(items) {
+            //         items.forEach(item => item.classList.remove('selected'));
+            //         if (selectedIndex >= 0 && selectedIndex < items.length) {
+            //             items[selectedIndex].classList.add('selected');
+            //             items[selectedIndex].scrollIntoView({
+            //                 block: 'nearest'
+            //             });
+            //         }
+            //     }
+            // });
 
 
             $('.tag-cell').on('mouseleave', function() {
 
                 const tag_data = $('#tag-data-' + $(this).data('id')).val();
+                console.log('tag_data', tag_data);
                 $.ajax({
                     url: '{{ route('update-tag') }}',
                     method: 'POST',
@@ -1431,6 +1496,9 @@
                     },
                     success: function(response) {
                         console.log(response);
+                        $('.tag-suggestions').on('mouseleave', function() {
+                            window.location.reload();
+                        })
 
 
                     }
@@ -1496,7 +1564,8 @@
                             $('.multiselect-dropdown').on('mouseleave', function() {
                                 $('.multiselect-dropdown').css('display',
                                     'none');
-                                toastr.success('Assignee Updated successfully');
+                                toastr.success(
+                                    'Assignee Updated successfully');
                             });
 
 
@@ -1587,7 +1656,8 @@
                                 id: cellId,
                                 priority: priority,
                                 project_id: "{{ $project->id }}",
-                                _token: $('meta[name="csrf-token"]').attr('content') // CSRF token
+                                _token: $('meta[name="csrf-token"]').attr(
+                                    'content') // CSRF token
                             },
                             success: function(response) {
                                 // Optionally handle the response if needed
@@ -1832,7 +1902,8 @@
             document.querySelectorAll('.js-sweetalert').forEach(link => {
                 link.addEventListener('click', function(event) {
                     event.preventDefault(); // Prevent the default action
-                    const url = this.getAttribute('data-url'); // Get the URL from data attribute
+                    const url = this.getAttribute(
+                        'data-url'); // Get the URL from data attribute
                     const formId = 'delete-form-' + url.split('/')
                         .pop(); // Generate form ID based on URL
                     Swal.fire({
